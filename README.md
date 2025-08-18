@@ -2,7 +2,7 @@
 
 # Package Monitoring
 
-A TypeScript-based monitoring utility designed with clean port/adapter principles, providing flexible and extensible application monitoring capabilities for Node.js applications.
+Pragmatic monitoring primitives for Node.js services.
 
 ## Features
 
