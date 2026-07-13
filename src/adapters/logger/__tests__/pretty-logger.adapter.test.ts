@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { PrettyLoggerAdapter } from './pretty-logger.adapter.js';
+import { PrettyLoggerAdapter } from '../pretty-logger.adapter.js';
 
 describe('PrettyLoggerAdapter', () => {
     beforeEach(() => {

@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import type { LoggerPort } from '../../ports/logger.port.js';
-import { OtelLoggerAdapter } from './otel-logger.adapter.js';
+import type { LoggerPort } from '../../../ports/logger.port.js';
+import { OtelLoggerAdapter } from '../otel-logger.adapter.js';
 
 function createInnerLogger(): LoggerPort {
     const logger: LoggerPort = {

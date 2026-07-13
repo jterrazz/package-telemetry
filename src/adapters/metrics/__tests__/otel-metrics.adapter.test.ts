@@ -1,7 +1,7 @@
 import { metrics } from '@opentelemetry/api';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { OtelMetricsAdapter } from './otel-metrics.adapter.js';
+import { OtelMetricsAdapter } from '../otel-metrics.adapter.js';
 
 function registerFakeMeterProvider() {
     const counter = { add: vi.fn() };

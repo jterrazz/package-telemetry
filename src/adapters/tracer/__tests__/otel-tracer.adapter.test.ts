@@ -1,7 +1,7 @@
 import { context, type Span, SpanStatusCode, trace } from '@opentelemetry/api';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { OtelTracerAdapter } from './otel-tracer.adapter.js';
+import { OtelTracerAdapter } from '../otel-tracer.adapter.js';
 
 function registerFakeTracerProvider() {
     const span = {

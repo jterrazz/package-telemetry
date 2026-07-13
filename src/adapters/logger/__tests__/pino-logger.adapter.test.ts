@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { PinoLoggerAdapter } from './pino-logger.adapter.js';
+import { PinoLoggerAdapter } from '../pino-logger.adapter.js';
 
 function createCapture() {
     const lines: string[] = [];

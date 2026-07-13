@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { NoopLoggerAdapter } from '../adapters/logger/noop-logger.adapter.js';
-import { OtelLoggerAdapter } from '../adapters/logger/otel-logger.adapter.js';
-import { PinoLoggerAdapter } from '../adapters/logger/pino-logger.adapter.js';
-import { PrettyLoggerAdapter } from '../adapters/logger/pretty-logger.adapter.js';
-import { OtelMetricsAdapter } from '../adapters/metrics/otel-metrics.adapter.js';
-import { OtelTracerAdapter } from '../adapters/tracer/otel-tracer.adapter.js';
-import { createLogger } from './create-logger.js';
-import { createMetrics } from './create-metrics.js';
-import { createTracer } from './create-tracer.js';
+import { NoopLoggerAdapter } from '../../adapters/logger/noop-logger.adapter.js';
+import { OtelLoggerAdapter } from '../../adapters/logger/otel-logger.adapter.js';
+import { PinoLoggerAdapter } from '../../adapters/logger/pino-logger.adapter.js';
+import { PrettyLoggerAdapter } from '../../adapters/logger/pretty-logger.adapter.js';
+import { OtelMetricsAdapter } from '../../adapters/metrics/otel-metrics.adapter.js';
+import { OtelTracerAdapter } from '../../adapters/tracer/otel-tracer.adapter.js';
+import { createLogger } from '../create-logger.js';
+import { createMetrics } from '../create-metrics.js';
+import { createTracer } from '../create-tracer.js';
 
 describe('createLogger', () => {
     beforeEach(() => {
