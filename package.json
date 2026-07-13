@@ -1,33 +1,51 @@
 {
-  "name": "@jterrazz/monitor",
-  "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
-  "version": "1.0.0",
-  "exports": {
-    ".": {
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.js"
+    "name": "@jterrazz/telemetry",
+    "version": "1.0.0",
+    "description": "Unified observability for Node.js — logs, traces and metrics over OpenTelemetry, with ports & adapters.",
+    "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jterrazz/package-telemetry"
+    },
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "exports": {
+        ".": {
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        },
+        "./register": {
+            "import": "./dist/register.js"
+        }
+    },
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/"
+    },
+    "scripts": {
+        "build": "tsdown",
+        "lint": "codestyle check",
+        "lint:fix": "codestyle fix",
+        "test": "vitest --run"
+    },
+    "dependencies": {
+        "@opentelemetry/api": "^1.9.0",
+        "@opentelemetry/api-logs": "^0.213.0",
+        "@opentelemetry/auto-instrumentations-node": "^0.71.0",
+        "@opentelemetry/exporter-logs-otlp-http": "^0.213.0",
+        "@opentelemetry/resources": "^2.6.0",
+        "@opentelemetry/sdk-logs": "^0.213.0",
+        "@opentelemetry/semantic-conventions": "^1.40.0",
+        "pino": "^10.3.1",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "@jterrazz/codestyle": "^3.0.9",
+        "@jterrazz/test": "^5.3.2",
+        "@jterrazz/typescript": "^5.2.0",
+        "@types/node": "^25.5.0",
+        "tsdown": "^0.21.5",
+        "vitest": "^4.1.4"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "scripts": {
-    "build": "ts-compile",
-    "test": "jest",
-    "lint": "code-standards"
-  },
-  "devDependencies": {
-    "@jterrazz/logger": "^1.1.0",
-    "@jterrazz/quality": "^2.2.0",
-    "@jterrazz/test": "^2.0.3",
-    "@jterrazz/typescript": "^2.0.6",
-    "@types/newrelic": "^9.14.8"
-  },
-  "dependencies": {
-    "newrelic": "^12.18.0"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  }
 }

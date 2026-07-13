@@ -1,97 +1,165 @@
-*Hey there – I’m Jean-Baptiste, just another developer doing weird things with code. All my projects live on [jterrazz.com](https://jterrazz.com) – complete with backstories and lessons learned. Feel free to poke around – you might just find something useful!*
+# @jterrazz/telemetry
 
-# Package Monitoring
+Unified observability for Node.js — logs, traces and metrics over OpenTelemetry, with ports & adapters.
 
-Pragmatic monitoring primitives for Node.js services.
-
-## Features
-
-- 📊 Type-safe monitoring interface
-- 🔌 Pluggable monitoring adapters
-- 💪 100% TypeScript
-- 🚀 Production-ready with no-op adapter
-- 📈 NewRelic integration support
-- ⏱️ Transaction and segment monitoring
-- 📊 Custom metrics recording
+Replaces `@jterrazz/logger` (absorbed) and `@jterrazz/monitor` (deprecated).
 
 ## Installation
 
 ```bash
-npm install @jterrazz/monitoring
+npm install @jterrazz/telemetry
 ```
 
-## Usage
-
-### Basic Usage
+## Quick start
 
 ```typescript
-import { NewRelicMonitoringAdapter, NoopMonitoringAdapter } from '@jterrazz/monitoring';
-import { Logger } from '@jterrazz/logger';
+import { createLogger, createMetrics, createTracer } from '@jterrazz/telemetry';
 
-// Development environment with NewRelic
-const devMonitoring = new NewRelicMonitoringAdapter({
-  environment: 'development',
-  licenseKey: process.env.NEW_RELIC_LICENSE_KEY,
-  logger: new Logger(/* ... */),
+const logger = createLogger();
+const tracer = createTracer({ namespace: 'myapp' });
+const metrics = createMetrics({ namespace: 'myapp' });
+
+await tracer.span('pipeline.run', async () => {
+    logger.info('Processing started', { source: 'worldnews' });
+    metrics.counter('task.started', { attributes: { task: 'pipeline' } });
 });
-
-// Production environment with No-op
-const prodMonitoring = new NoopMonitoringAdapter();
-
-// Initialize monitoring
-await monitoring.initialize();
-
-// Monitor a transaction
-await monitoring.monitorTransaction('User', 'Create', async () => {
-  // Your business logic here
-});
-
-// Monitor a segment
-await monitoring.monitorSegment('User/Profile/Update', async () => {
-  // Your operation here
-});
-
-// Record metrics
-monitoring.recordCount('User', 'Login', 1);
-monitoring.recordMeasurement('Performance', 'ResponseTime', 150);
 ```
 
-### Available Adapters
+Then load the OpenTelemetry SDK before your app:
 
-- **NewRelicMonitoringAdapter**: Full-featured monitoring with NewRelic (recommended for production)
+```bash
+node --import @jterrazz/telemetry/register dist/index.js
+```
 
-  ```typescript
-  new NewRelicMonitoringAdapter({
-    environment: 'production',
-    licenseKey: process.env.NEW_RELIC_LICENSE_KEY,
-    logger: new Logger(/* ... */),
-  });
-  ```
+That's the entire setup. Everything is configured from `OTEL_*` environment
+variables — on the jterrazz K8s app chart they are injected automatically
+(`OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_EXPORTER_OTLP_ENDPOINT`).
+Without an endpoint configured, telemetry is a silent no-op: logs still reach
+stdout, spans and metrics cost nothing.
 
-- **NoopMonitoringAdapter**: Zero-overhead monitoring (recommended for development or testing)
-  ```typescript
-  new NoopMonitoringAdapter();
-  ```
+## The three pillars
 
-## Architecture
+### Logs — `LoggerPort`
 
-This package follows the hexagonal (ports and adapters) architecture:
+```typescript
+const logger = createLogger({
+    level: 'info', // 'debug' | 'info' | 'warn' | 'error' | 'silent'
+    pretty: true, // colored inline output; defaults to true outside production
+    otlp: true, // dual-emit to the OTLP collector; defaults to auto-detect
+});
 
-- `src/ports/`: Contains the core interfaces and types
-  - `monitoring.port.ts`: Defines the monitoring interface
-- `src/adapters/`: Implements various monitoring adapters
-  - `new-relic.adapter.ts`: NewRelic-based monitoring
-  - `noop.adapter.ts`: No-operation monitoring
+logger.info('Server started', { port: 3000 });
+logger.error('Request failed', { error: new Error('Connection timeout') });
 
-## Contributing
+const requestLogger = logger.child({ requestId: 'abc-123' });
+requestLogger.info('Processing'); // includes requestId in every log
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+In production the logger dual-emits: JSON lines on stdout (`kubectl logs`
+keeps working) and OTLP to the collector (→ Loki → Grafana).
+
+### Traces — `TracerPort`
+
+```typescript
+const tracer = createTracer({ namespace: 'myapp' });
+
+await tracer.span(
+    'articles.fetch', // emitted as 'myapp.articles.fetch'
+    async () => fetchArticles(),
+    { attributes: { source: 'worldnews' } },
+);
+
+tracer.event('cache.miss', { key: 'articles' }); // on the active span
+tracer.setAttribute('user.id', 42); // on the active span
+```
+
+Spans record timing and status, capture thrown errors (then rethrow), and
+nest automatically alongside HTTP/DB auto-instrumentation.
+
+### Metrics — `MetricsPort`
+
+```typescript
+const metrics = createMetrics<AppMetrics>({ namespace: 'myapp' });
+
+metrics.counter('task.started', { attributes: { task: 'pipeline' } });
+metrics.histogram('task.duration', 125, { attributes: { task: 'pipeline' } });
+metrics.gauge('queue.depth', 7);
+```
+
+Metrics flow through OTLP to the collector, which remote-writes them to
+Prometheus — no `/metrics` endpoint, no prom-client.
+
+## Typed metric catalogue
+
+Compose the base catalogue with app-specific metrics to get a compile-time
+metrics plan (same pattern as `AnalyticsEvents` in `@jterrazz/analytics`):
+
+```typescript
+import { createMetrics, type TelemetryBaseMetrics } from '@jterrazz/telemetry';
+
+// Use a type alias (&), not an interface — interfaces lack the implicit
+// index signature required by the catalogue constraint.
+type AppMetrics = TelemetryBaseMetrics & {
+    'articles.processed': { source: string };
+};
+
+const metrics = createMetrics<AppMetrics>({ namespace: 'signews' });
+
+metrics.counter('articles.processed', { attributes: { source: 'worldnews' } });
+metrics.counter('articles.procesed'); // ✗ compile error
+```
+
+The base catalogue ships generic task lifecycle metrics so dashboards stay
+uniform across services: `task.started`, `task.completed`, `task.failed`,
+`task.duration`. The domain is never part of the metric name — the
+`namespace` option prefixes it at emission (`signews.task.started`).
+
+## Conventions (OpenTelemetry-aligned)
+
+- Metric and span names: lowercase `dot.case`, low cardinality
+  (`pipeline.run`, `articles.processed`).
+- High-cardinality detail (ids, urls) goes in attributes, never in names.
+- Service identity comes from `OTEL_SERVICE_NAME` / `OTEL_RESOURCE_ATTRIBUTES`
+  (semconv resource attributes), injected by the infrastructure.
+
+## Environment reference
+
+| Variable                      | Effect                                          |
+| ----------------------------- | ----------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint; absent = export disabled    |
+| `OTEL_SERVICE_NAME`           | Service identity on every signal                |
+| `OTEL_RESOURCE_ATTRIBUTES`    | Extra resource attrs (`deployment.environment`) |
+| `OTEL_EXPORTER_OTLP_HEADERS`  | `Key=Value,Key2=Value2` auth headers            |
+| `OTEL_SDK_DISABLED=true`      | Hard kill switch                                |
+
+## Adapters
+
+Every pillar follows ports & adapters. The factories cover the common path;
+adapters are exported for custom wiring:
+
+| Pillar  | Adapters                                                                             |
+| ------- | ------------------------------------------------------------------------------------ |
+| Logs    | `PinoLoggerAdapter`, `PrettyLoggerAdapter`, `OtelLoggerAdapter`, `NoopLoggerAdapter` |
+| Traces  | `OtelTracerAdapter`, `NoopTracerAdapter`                                             |
+| Metrics | `OtelMetricsAdapter`, `NoopMetricsAdapter`                                           |
+
+The OTel adapters use only `@opentelemetry/api`: they are safe no-ops until
+`@jterrazz/telemetry/register` initializes the SDK, so tests and local runs
+need no special casing.
+
+## Migrating from @jterrazz/logger
+
+`LoggerPort`, `LoggerLevel`, `PinoLoggerAdapter` and `NoopLoggerAdapter` are
+source-compatible — change the import:
+
+```diff
+-import { type LoggerPort, PinoLoggerAdapter } from '@jterrazz/logger';
++import { type LoggerPort, PinoLoggerAdapter } from '@jterrazz/telemetry';
+```
+
+`PinoLoggerAdapter` no longer takes `prettyPrint` — use `createLogger()` or
+`PrettyLoggerAdapter` for development output.
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
-
-## Author
-
-- Jean-Baptiste Terrazzoni ([@jterrazz](https://github.com/jterrazz))
-- Email: contact@jterrazz.com
+MIT
