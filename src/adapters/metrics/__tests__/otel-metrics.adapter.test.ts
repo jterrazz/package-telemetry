@@ -7,15 +7,24 @@ function registerFakeMeterProvider() {
     const counter = { add: vi.fn() };
     const gauge = { record: vi.fn() };
     const histogram = { record: vi.fn() };
+    const observableCallbacks: ((result: {
+        observe: (value: number, attributes?: Record<string, unknown>) => void;
+    }) => void)[] = [];
+    const observableGauge = {
+        addCallback: vi.fn((callback: (typeof observableCallbacks)[number]) => {
+            observableCallbacks.push(callback);
+        }),
+    };
     const meter = {
         createCounter: vi.fn(() => counter),
         createGauge: vi.fn(() => gauge),
         createHistogram: vi.fn(() => histogram),
+        createObservableGauge: vi.fn(() => observableGauge),
     };
     metrics.setGlobalMeterProvider({
         getMeter: () => meter,
     } as never);
-    return { counter, gauge, histogram, meter };
+    return { counter, gauge, histogram, meter, observableCallbacks, observableGauge };
 }
 
 describe('OtelMetricsAdapter', () => {
@@ -77,6 +86,41 @@ describe('OtelMetricsAdapter', () => {
 
         // Then
         expect(fake.counter.add).toHaveBeenCalledWith(1, { task: 'x' });
+    });
+
+    test('should observe values with attributes through an observable gauge', () => {
+        // Given
+        const fake = registerFakeMeterProvider();
+        const adapter = new OtelMetricsAdapter({ namespace: 'app' });
+
+        // When — register, then simulate an export-interval collection
+        adapter.observableGauge('eventloop.lag.ms', (observe) => {
+            observe(1.5, { stat: 'mean' });
+            observe(9.9, { stat: 'p99' });
+        });
+        const observe = vi.fn();
+        for (const callback of fake.observableCallbacks) {
+            callback({ observe });
+        }
+
+        // Then
+        expect(fake.meter.createObservableGauge).toHaveBeenCalledWith('app.eventloop.lag.ms');
+        expect(observe).toHaveBeenCalledWith(1.5, { stat: 'mean' });
+        expect(observe).toHaveBeenCalledWith(9.9, { stat: 'p99' });
+    });
+
+    test('should ignore duplicate observable gauge registrations', () => {
+        // Given
+        const fake = registerFakeMeterProvider();
+        const adapter = new OtelMetricsAdapter();
+
+        // When
+        adapter.observableGauge('queue.depth', () => undefined);
+        adapter.observableGauge('queue.depth', () => undefined);
+
+        // Then
+        expect(fake.meter.createObservableGauge).toHaveBeenCalledTimes(1);
+        expect(fake.observableGauge.addCallback).toHaveBeenCalledTimes(1);
     });
 
     test('should be a safe no-op without a registered SDK', () => {

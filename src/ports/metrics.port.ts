@@ -72,7 +72,26 @@ export interface MetricsPort<TMetrics extends TelemetryMetrics = TelemetryMetric
         value: number,
         options?: MetricsRecordOptions<TMetrics[TName]>,
     ) => void;
+
+    /**
+     * Register an observable (async) gauge, sampled once per metric export
+     * interval. The callback receives an `observe` function it can call one
+     * or more times (e.g. to report the same metric with different
+     * attributes). Registering the same name twice is a no-op.
+     */
+    observableGauge: <TName extends keyof TMetrics & string>(
+        name: TName,
+        callback: (observe: MetricsObserve<TMetrics[TName]>) => void,
+    ) => void;
 }
+
+/**
+ * Observation function handed to observableGauge callbacks
+ */
+export type MetricsObserve<TAttributes extends TelemetryAttributes = TelemetryAttributes> = (
+    value: number,
+    attributes?: TAttributes,
+) => void;
 
 export interface MetricsRecordOptions<
     TAttributes extends TelemetryAttributes = TelemetryAttributes,

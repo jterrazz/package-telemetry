@@ -9,6 +9,7 @@ import {
 
 import type {
     MetricsCounterOptions,
+    MetricsObserve,
     MetricsPort,
     MetricsRecordOptions,
     TelemetryMetrics,
@@ -45,6 +46,7 @@ export class OtelMetricsAdapter<
     private readonly counters = new Map<string, Counter>();
     private readonly gauges = new Map<string, Gauge>();
     private readonly histograms = new Map<string, Histogram>();
+    private readonly observableGauges = new Set<string>();
     private readonly meter: Meter;
     private readonly namespace?: string;
 
@@ -80,6 +82,24 @@ export class OtelMetricsAdapter<
             this.gauges.set(qualifiedName, gauge);
         }
         gauge.record(value, sanitizeAttributes(options?.attributes));
+    }
+
+    observableGauge<TName extends keyof TMetrics & string>(
+        name: TName,
+        callback: (observe: MetricsObserve<TMetrics[TName]>) => void,
+    ): void {
+        const qualifiedName = this.qualify(name);
+        if (this.observableGauges.has(qualifiedName)) {
+            return;
+        }
+        this.observableGauges.add(qualifiedName);
+
+        const gauge = this.meter.createObservableGauge(qualifiedName);
+        gauge.addCallback((result) => {
+            callback((value, attributes) => {
+                result.observe(value, sanitizeAttributes(attributes));
+            });
+        });
     }
 
     histogram<TName extends keyof TMetrics & string>(

@@ -1,6 +1,6 @@
 {
     "name": "@jterrazz/telemetry",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Unified observability for Node.js — logs, traces and metrics over OpenTelemetry, with ports & adapters.",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
     "repository": {
@@ -34,8 +34,10 @@
         "@opentelemetry/api-logs": "^0.213.0",
         "@opentelemetry/auto-instrumentations-node": "^0.71.0",
         "@opentelemetry/exporter-logs-otlp-http": "^0.213.0",
+        "@opentelemetry/exporter-metrics-otlp-http": "^0.213.0",
         "@opentelemetry/resources": "^2.6.0",
         "@opentelemetry/sdk-logs": "^0.213.0",
+        "@opentelemetry/sdk-metrics": "^2.6.0",
         "@opentelemetry/semantic-conventions": "^1.40.0",
         "pino": "^10.3.1",
         "zod": "^4.3.6"

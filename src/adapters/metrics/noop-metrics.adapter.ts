@@ -1,5 +1,6 @@
 import type {
     MetricsCounterOptions,
+    MetricsObserve,
     MetricsPort,
     MetricsRecordOptions,
     TelemetryMetrics,
@@ -31,6 +32,13 @@ export class NoopMetricsAdapter<
         _name: TName,
         _value: number,
         _options?: MetricsRecordOptions<TMetrics[TName]>,
+    ): void {
+        // No operation
+    }
+
+    observableGauge<TName extends keyof TMetrics & string>(
+        _name: TName,
+        _callback: (observe: MetricsObserve<TMetrics[TName]>) => void,
     ): void {
         // No operation
     }
