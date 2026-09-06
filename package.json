@@ -1,6 +1,6 @@
 {
     "name": "@jterrazz/telemetry",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Unified observability for Node.js — logs, traces and metrics over OpenTelemetry, with ports & adapters.",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
     "repository": {
