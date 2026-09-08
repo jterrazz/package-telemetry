@@ -1,0 +1,7 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    // Knip's oxlint/oxfmt plugins enable only when those packages are direct
+    // dependencies; the one-devDependency shape declares @jterrazz/typescript
+    // alone, so the two tools read as unlisted in their own config files.
+    "ignoreDependencies": ["oxfmt", "oxlint"]
+}
