@@ -1,7 +1,7 @@
 import { type Attributes, SpanStatusCode, trace, type Tracer } from '@opentelemetry/api';
 
-import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
-import type { TracerPort, TracerSpanOptions } from '../../ports/tracer.port.js';
+import { type TelemetryAttributes } from '../../ports/telemetry.port.js';
+import { type TracerPort, type TracerSpanOptions } from '../../ports/tracer.port.js';
 
 function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
     if (!attributes) {
@@ -25,7 +25,7 @@ function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
  * including in tests and local runs without a collector.
  */
 export class OtelTracerAdapter implements TracerPort {
-    private readonly namespace?: string;
+    private readonly namespace: string | undefined;
     private readonly tracer: Tracer;
 
     constructor(options: { name?: string; namespace?: string } = {}) {
@@ -54,9 +54,12 @@ export class OtelTracerAdapter implements TracerPort {
     }
 
     async span<T>(name: string, fn: () => Promise<T>, options?: TracerSpanOptions): Promise<T> {
-        const spanName = this.namespace ? `${this.namespace}.${name}` : name;
+        const spanName =
+            this.namespace === undefined || this.namespace === ''
+                ? name
+                : `${this.namespace}.${name}`;
 
-        return this.tracer.startActiveSpan(
+        return await this.tracer.startActiveSpan(
             spanName,
             { attributes: sanitizeAttributes(options?.attributes) },
             async (span) => {

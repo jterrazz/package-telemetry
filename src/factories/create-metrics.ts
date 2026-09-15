@@ -1,12 +1,12 @@
 import { OtelMetricsAdapter } from '../adapters/metrics/otel-metrics.adapter.js';
-import type { MetricsPort, TelemetryMetrics } from '../ports/metrics.port.js';
+import { type MetricsPort, type TelemetryMetrics } from '../ports/metrics.port.js';
 
-export interface CreateMetricsOptions {
+export type CreateMetricsOptions = {
     /** Meter name (defaults to OTEL_SERVICE_NAME) */
     name?: string;
     /** Prefix applied to every metric name: '{namespace}.{name}' */
     namespace?: string;
-}
+};
 
 /**
  * Create an OpenTelemetry-backed metrics recorder. A no-op until the SDK

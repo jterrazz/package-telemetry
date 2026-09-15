@@ -1,7 +1,6 @@
-import bundle from '@jterrazz/typescript/presets/tsdown/bundle.js';
-import { defineConfig } from 'tsdown';
+import bundle from '@jterrazz/typescript/tsdown/bundle.js';
 
-export default defineConfig([
+export default [
     {
         ...bundle,
         entry: ['src/index.ts'],
@@ -13,4 +12,4 @@ export default defineConfig([
         entry: ['src/register.ts'],
         format: ['esm'],
     },
-]);
+];

@@ -4,8 +4,19 @@ import { PinoLoggerAdapter } from '../pino-logger.adapter.js';
 
 function createCapture() {
     const lines: string[] = [];
+
     return {
         lines,
+        /** The n-th captured line, parsed as JSON — throws when nothing was captured. */
+        read<TLog>(index = 0): TLog {
+            const line = lines[index];
+
+            if (line === undefined) {
+                throw new Error(`no line captured at index ${index}`);
+            }
+
+            return JSON.parse(line) as TLog;
+        },
         stream: {
             write(chunk: string) {
                 lines.push(chunk);
@@ -14,7 +25,7 @@ function createCapture() {
     };
 }
 
-describe('PinoLoggerAdapter', () => {
+describe('pinoLoggerAdapter', () => {
     test('should log structured JSON with level, message and meta', () => {
         // Given
         const capture = createCapture();
@@ -24,14 +35,14 @@ describe('PinoLoggerAdapter', () => {
         logger.info('Test message', { userId: 123 });
 
         // Then
-        const log = JSON.parse(capture.lines[0]) as {
+        const log = capture.read<{
             level: string;
             meta: { userId: number };
             msg: string;
-        };
+        }>();
         expect(log.level).toBe('info');
         expect(log.msg).toBe('Test message');
-        expect(log.meta).toEqual({ userId: 123 });
+        expect(log.meta).toStrictEqual({ userId: 123 });
     });
 
     test('should serialize errors with message and stack', () => {
@@ -43,15 +54,15 @@ describe('PinoLoggerAdapter', () => {
         logger.error('Something failed', { error: new Error('boom'), requestId: 'r-1' });
 
         // Then
-        const log = JSON.parse(capture.lines[0]) as {
+        const log = capture.read<{
             error: { message: string; stack: string };
             level: string;
             meta: { requestId: string };
-        };
+        }>();
         expect(log.level).toBe('error');
         expect(log.error.message).toBe('boom');
         expect(log.error.stack).toContain('Error: boom');
-        expect(log.meta).toEqual({ requestId: 'r-1' });
+        expect(log.meta).toStrictEqual({ requestId: 'r-1' });
     });
 
     test('should respect the minimum level', () => {
@@ -77,7 +88,7 @@ describe('PinoLoggerAdapter', () => {
         logger.child({ requestId: 'r-42' }).info('with context');
 
         // Then
-        const log = JSON.parse(capture.lines[0]) as { requestId: string };
+        const log = capture.read<{ requestId: string }>();
         expect(log.requestId).toBe('r-42');
     });
 });

@@ -7,14 +7,14 @@ import {
     metrics,
 } from '@opentelemetry/api';
 
-import type {
-    MetricsCounterOptions,
-    MetricsObserve,
-    MetricsPort,
-    MetricsRecordOptions,
-    TelemetryMetrics,
+import {
+    type MetricsCounterOptions,
+    type MetricsObserve,
+    type MetricsPort,
+    type MetricsRecordOptions,
+    type TelemetryMetrics,
 } from '../../ports/metrics.port.js';
-import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
+import { type TelemetryAttributes } from '../../ports/telemetry.port.js';
 
 function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
     if (!attributes) {
@@ -48,7 +48,7 @@ export class OtelMetricsAdapter<
     private readonly histograms = new Map<string, Histogram>();
     private readonly observableGauges = new Set<string>();
     private readonly meter: Meter;
-    private readonly namespace?: string;
+    private readonly namespace: string | undefined;
 
     constructor(options: { name?: string; namespace?: string } = {}) {
         this.namespace = options.namespace;
@@ -117,6 +117,10 @@ export class OtelMetricsAdapter<
     }
 
     private qualify(name: string): string {
-        return this.namespace ? `${this.namespace}.${name}` : name;
+        if (this.namespace === undefined || this.namespace === '') {
+            return name;
+        }
+
+        return `${this.namespace}.${name}`;
     }
 }

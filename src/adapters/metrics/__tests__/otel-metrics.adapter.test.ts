@@ -3,23 +3,26 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { OtelMetricsAdapter } from '../otel-metrics.adapter.js';
 
+type Measure = (value: number, attributes?: Record<string, unknown>) => void;
+type ObservableCallback = (result: { observe: Measure }) => void;
+
 function registerFakeMeterProvider() {
-    const counter = { add: vi.fn() };
-    const gauge = { record: vi.fn() };
-    const histogram = { record: vi.fn() };
-    const observableCallbacks: ((result: {
-        observe: (value: number, attributes?: Record<string, unknown>) => void;
-    }) => void)[] = [];
+    const counter = { add: vi.fn<Measure>() };
+    const gauge = { record: vi.fn<Measure>() };
+    const histogram = { record: vi.fn<Measure>() };
+    const observableCallbacks: ObservableCallback[] = [];
     const observableGauge = {
-        addCallback: vi.fn((callback: (typeof observableCallbacks)[number]) => {
-            observableCallbacks.push(callback);
+        addCallback: vi.fn<(collect: ObservableCallback) => void>((collect) => {
+            observableCallbacks.push(collect);
         }),
     };
     const meter = {
-        createCounter: vi.fn(() => counter),
-        createGauge: vi.fn(() => gauge),
-        createHistogram: vi.fn(() => histogram),
-        createObservableGauge: vi.fn(() => observableGauge),
+        createCounter: vi.fn<(name: string) => typeof counter>(() => counter),
+        createGauge: vi.fn<(name: string) => typeof gauge>(() => gauge),
+        createHistogram: vi.fn<(name: string) => typeof histogram>(() => histogram),
+        createObservableGauge: vi.fn<(name: string) => typeof observableGauge>(
+            () => observableGauge,
+        ),
     };
     metrics.setGlobalMeterProvider({
         getMeter: () => meter,
@@ -27,7 +30,7 @@ function registerFakeMeterProvider() {
     return { counter, gauge, histogram, meter, observableCallbacks, observableGauge };
 }
 
-describe('OtelMetricsAdapter', () => {
+describe('otelMetricsAdapter', () => {
     afterEach(() => {
         metrics.disable();
     });
@@ -71,7 +74,7 @@ describe('OtelMetricsAdapter', () => {
         adapter.counter('task.completed', { attributes: { task: 'b' }, value: 3 });
 
         // Then
-        expect(fake.meter.createCounter).toHaveBeenCalledTimes(1);
+        expect(fake.meter.createCounter).toHaveBeenCalledOnce();
         expect(fake.counter.add).toHaveBeenCalledWith(1, { task: 'a' });
         expect(fake.counter.add).toHaveBeenCalledWith(3, { task: 'b' });
     });
@@ -98,9 +101,9 @@ describe('OtelMetricsAdapter', () => {
             observe(1.5, { stat: 'mean' });
             observe(9.9, { stat: 'p99' });
         });
-        const observe = vi.fn();
-        for (const callback of fake.observableCallbacks) {
-            callback({ observe });
+        const observe = vi.fn<Measure>();
+        for (const collect of fake.observableCallbacks) {
+            collect({ observe });
         }
 
         // Then
@@ -115,12 +118,12 @@ describe('OtelMetricsAdapter', () => {
         const adapter = new OtelMetricsAdapter();
 
         // When
-        adapter.observableGauge('queue.depth', () => undefined);
-        adapter.observableGauge('queue.depth', () => undefined);
+        adapter.observableGauge('queue.depth', () => {});
+        adapter.observableGauge('queue.depth', () => {});
 
         // Then
-        expect(fake.meter.createObservableGauge).toHaveBeenCalledTimes(1);
-        expect(fake.observableGauge.addCallback).toHaveBeenCalledTimes(1);
+        expect(fake.meter.createObservableGauge).toHaveBeenCalledOnce();
+        expect(fake.observableGauge.addCallback).toHaveBeenCalledOnce();
     });
 
     test('should be a safe no-op without a registered SDK', () => {

@@ -1,4 +1,4 @@
-import type { TelemetryAttributes } from './telemetry.port.js';
+import { type TelemetryAttributes } from './telemetry.port.js';
 
 /**
  * Metrics port - defines how to record counters, histograms and gauges,
@@ -38,15 +38,13 @@ export type TelemetryBaseMetrics = {
     'task.started': { task: string };
 };
 
-export interface MetricsCounterOptions<
-    TAttributes extends TelemetryAttributes = TelemetryAttributes,
-> {
+export type MetricsCounterOptions<TAttributes extends TelemetryAttributes = TelemetryAttributes> = {
     attributes?: TAttributes;
     /** Increment step (defaults to 1) */
     value?: number;
-}
+};
 
-export interface MetricsPort<TMetrics extends TelemetryMetrics = TelemetryMetrics> {
+export type MetricsPort<TMetrics extends TelemetryMetrics = TelemetryMetrics> = {
     /**
      * Increment a counter metric
      */
@@ -83,7 +81,7 @@ export interface MetricsPort<TMetrics extends TelemetryMetrics = TelemetryMetric
         name: TName,
         callback: (observe: MetricsObserve<TMetrics[TName]>) => void,
     ) => void;
-}
+};
 
 /**
  * Observation function handed to observableGauge callbacks
@@ -93,8 +91,6 @@ export type MetricsObserve<TAttributes extends TelemetryAttributes = TelemetryAt
     attributes?: TAttributes,
 ) => void;
 
-export interface MetricsRecordOptions<
-    TAttributes extends TelemetryAttributes = TelemetryAttributes,
-> {
+export type MetricsRecordOptions<TAttributes extends TelemetryAttributes = TelemetryAttributes> = {
     attributes?: TAttributes;
-}
+};

@@ -1,6 +1,5 @@
-import { oxlint } from '@jterrazz/typescript';
-import { defineConfig } from 'oxlint';
+import { defineConfig, library, type OxlintConfig } from '@jterrazz/typescript/oxlint';
 
-export default defineConfig({
-    extends: [oxlint.node],
-});
+const config: OxlintConfig = defineConfig(library);
+
+export default config;

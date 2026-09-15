@@ -5,16 +5,16 @@ import { OtelTracerAdapter } from '../otel-tracer.adapter.js';
 
 function registerFakeTracerProvider() {
     const span = {
-        addEvent: vi.fn(),
-        end: vi.fn(),
-        recordException: vi.fn(),
-        setAttribute: vi.fn(),
-        setStatus: vi.fn(),
+        addEvent: vi.fn<Span['addEvent']>(),
+        end: vi.fn<Span['end']>(),
+        recordException: vi.fn<Span['recordException']>(),
+        setAttribute: vi.fn<Span['setAttribute']>(),
+        setStatus: vi.fn<Span['setStatus']>(),
     };
     const tracer = {
-        startActiveSpan: vi.fn((_name: string, _options: unknown, fn: (span: Span) => unknown) =>
-            fn(span as unknown as Span),
-        ),
+        startActiveSpan: vi.fn<
+            (name: string, options: unknown, fn: (span: Span) => unknown) => unknown
+        >((_name, _options, fn) => fn(span as unknown as Span)),
     };
     trace.setGlobalTracerProvider({
         getTracer: () => tracer,
@@ -22,7 +22,7 @@ function registerFakeTracerProvider() {
     return { span, tracer };
 }
 
-describe('OtelTracerAdapter', () => {
+describe('otelTracerAdapter', () => {
     afterEach(() => {
         trace.disable();
         context.disable();
@@ -46,7 +46,7 @@ describe('OtelTracerAdapter', () => {
             expect.any(Function),
         );
         expect(fake.span.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
-        expect(fake.span.end).toHaveBeenCalled();
+        expect(fake.span.end).toHaveBeenCalledWith();
     });
 
     test('should record the error, mark the span failed and rethrow', async () => {
@@ -66,7 +66,7 @@ describe('OtelTracerAdapter', () => {
             message: 'boom',
         });
         expect(fake.span.recordException).toHaveBeenCalledWith(failure);
-        expect(fake.span.end).toHaveBeenCalled();
+        expect(fake.span.end).toHaveBeenCalledWith();
     });
 
     test('should qualify span names with the namespace', async () => {
@@ -75,7 +75,7 @@ describe('OtelTracerAdapter', () => {
         const tracer = new OtelTracerAdapter({ namespace: 'signews' });
 
         // When
-        await tracer.span('pipeline.run', async () => undefined);
+        await tracer.span('pipeline.run', async () => {});
 
         // Then
         expect(fake.tracer.startActiveSpan).toHaveBeenCalledWith(

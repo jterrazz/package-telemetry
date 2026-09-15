@@ -1,7 +1,18 @@
 {
     "$schema": "https://unpkg.com/knip@6/schema.json",
-    // Knip's oxlint/oxfmt plugins enable only when those packages are direct
-    // dependencies; the one-devDependency shape declares @jterrazz/typescript
-    // alone, so the two tools read as unlisted in their own config files.
-    "ignoreDependencies": ["oxfmt", "oxlint"]
+    // `entry` REPLACES the preset's list rather than adding to it, so the
+    // toolchain's own config files are repeated here beside the two the
+    // package publishes: `./register` is an entry point of its own, and
+    // knip reads the `exports` map as built paths under dist/.
+    "entry": [
+        "src/index.ts!",
+        "src/register.ts!",
+        "oxlint.config.ts",
+        "oxfmt.config.ts",
+        "tsdown.config.js"
+    ],
+    // The bundler is @jterrazz/typescript's dependency, not this package's —
+    // the two-entry build needs tsdown's own config file, which the CLI's
+    // single-entry `bundle` command cannot express.
+    "ignoreBinaries": ["tsdown"]
 }

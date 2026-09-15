@@ -1,5 +1,5 @@
-import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
-import type { TracerPort, TracerSpanOptions } from '../../ports/tracer.port.js';
+import { type TelemetryAttributes } from '../../ports/telemetry.port.js';
+import { type TracerPort, type TracerSpanOptions } from '../../ports/tracer.port.js';
 
 /**
  * No-op tracer adapter: spans execute their function directly, events and
@@ -15,6 +15,6 @@ export class NoopTracerAdapter implements TracerPort {
     }
 
     async span<T>(_name: string, fn: () => Promise<T>, _options?: TracerSpanOptions): Promise<T> {
-        return fn();
+        return await fn();
     }
 }

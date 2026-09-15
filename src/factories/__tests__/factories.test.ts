@@ -64,6 +64,8 @@ describe('typed metric catalogue', () => {
 
     test('noop logger stays silent', () => {
         const logger = new NoopLoggerAdapter();
-        expect(() => logger.child({ a: 1 }).info('nothing')).not.toThrow();
+        expect(() => {
+            logger.child({ a: 1 }).info('nothing');
+        }).not.toThrow();
     });
 });

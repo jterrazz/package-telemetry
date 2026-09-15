@@ -2,10 +2,21 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { PrettyLoggerAdapter } from '../pretty-logger.adapter.js';
 
-describe('PrettyLoggerAdapter', () => {
+/** The line the adapter printed — throws when it printed nothing. */
+function printedLine(): string {
+    const [call] = vi.mocked(console.log).mock.calls;
+
+    if (!call) {
+        throw new Error('console.log was not called');
+    }
+
+    return String(call[0]);
+}
+
+describe('prettyLoggerAdapter', () => {
     beforeEach(() => {
-        vi.spyOn(console, 'log').mockImplementation(() => undefined);
-        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        vi.spyOn(console, 'log').mockImplementation(() => {});
+        vi.spyOn(console, 'error').mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -20,7 +31,7 @@ describe('PrettyLoggerAdapter', () => {
         logger.info('server.started', { port: 3000 });
 
         // Then
-        const output = vi.mocked(console.log).mock.calls[0][0] as string;
+        const output = printedLine();
         expect(output).toContain('INFO');
         expect(output).toContain('server.started');
         expect(output).toContain('port');
@@ -60,7 +71,7 @@ describe('PrettyLoggerAdapter', () => {
         logger.child({ requestId: 'r-42' }).info('with context');
 
         // Then
-        const output = vi.mocked(console.log).mock.calls[0][0] as string;
+        const output = printedLine();
         expect(output).toContain('requestId');
         expect(output).toContain('r-42');
     });

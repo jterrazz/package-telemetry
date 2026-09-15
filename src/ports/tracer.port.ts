@@ -1,4 +1,4 @@
-import type { TelemetryAttributes } from './telemetry.port.js';
+import { type TelemetryAttributes } from './telemetry.port.js';
 
 /**
  * Tracer port - defines how to trace operations as spans, independently of
@@ -8,7 +8,7 @@ import type { TelemetryAttributes } from './telemetry.port.js';
  * cardinality (e.g. 'pipeline.run', 'articles.fetch'). High-cardinality
  * detail (ids, urls) belongs in attributes, never in the name.
  */
-export interface TracerPort {
+export type TracerPort = {
     /**
      * Add an event to the currently active span. Dropped when no span is
      * active — this is often intentional.
@@ -26,8 +26,8 @@ export interface TracerPort {
      * status and any thrown error, then rethrows.
      */
     span: <T>(name: string, fn: () => Promise<T>, options?: TracerSpanOptions) => Promise<T>;
-}
+};
 
-export interface TracerSpanOptions {
+export type TracerSpanOptions = {
     attributes?: TelemetryAttributes;
-}
+};

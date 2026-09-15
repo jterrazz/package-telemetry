@@ -28,7 +28,7 @@ a process that only needs the ports.
 
 `./register` is ESM-only (`package.json`): `register/initialize.ts` uses a
 top-level `await import(...)` for the auto-instrumentation package, and
-`--import` itself only loads ESM. `tsdown.config.ts` builds it as a second,
+`--import` itself only loads ESM. `tsdown.config.js` builds it as a second,
 non-cleaning entry alongside the CJS+ESM barrel.
 
 ## The OTel bootstrap is opt-in and idempotent

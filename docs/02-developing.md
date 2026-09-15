@@ -10,9 +10,10 @@ package's own config files.
 npm install
 ```
 
-No native build tool beyond that: `tsdown` (pulled in as a direct
-devDependency, configured through `@jterrazz/typescript`'s bundle preset)
-compiles `src/` into `dist/`.
+Nothing tool-shaped is installed beside it: `tsdown`, oxlint, oxfmt, knip
+and the two compilers all arrive with `@jterrazz/typescript`, so no version
+of the toolchain is pinned twice. `tsdown` — configured through that
+package's bundle preset — compiles `src/` into `dist/`.
 
 ## Commands
 
@@ -30,15 +31,38 @@ run `npm ci` once if the lockfile changed since the last install.
 
 ## Configuration
 
-Every tool config is a thin `extends`/`compose` over `@jterrazz/typescript`'s
-presets — nothing is configured twice:
+Every tool config names one `@jterrazz/typescript` preset and stops there —
+nothing is configured twice.
 
-- `tsconfig.json` extends `@jterrazz/typescript/tsconfig/node`.
-- `oxlint.config.ts` extends `oxlint.node`.
-- `oxfmt.config.ts` uses the shared `oxfmt` preset directly.
-- `tsdown.config.ts` spreads the `bundle` preset across two entries: the
+The profile is `library`: the one a package published to a registry names,
+and the one whose tsconfig turns on `isolatedDeclarations` and
+`erasableSyntaxOnly`. Every public export therefore states its own type, and
+no enum, namespace or parameter property survives into the declarations.
+
+- `tsconfig.json` extends `@jterrazz/typescript/tsconfig/library`, and
+  carries nothing else — a local `compilerOption` would settle for this
+  package alone what the preset owes every package.
+- `oxlint.config.ts` is `defineConfig(library)`, typed as `OxlintConfig`
+  because `isolatedDeclarations` refuses an inferred default export.
+- `oxfmt.config.ts` is `defineConfig(base)`, typed the same way.
+- `tsdown.config.js` spreads the `bundle` preset across two entries: the
   barrel (`src/index.ts`, CJS + ESM) and `src/register.ts` (ESM-only,
-  `clean: false` so it does not wipe the barrel's output).
+  `clean: false` so it does not wipe the barrel's output). It is JavaScript
+  because the preset it spreads ships as JavaScript with no declarations,
+  which `library`'s compiler settings refuse to import from a `.ts` file.
+- `knip.json` carries the two facts knip cannot derive: `src/register.ts` is
+  a second published entry point, and `tsdown` is the toolchain's binary
+  rather than this package's. Each entry states its reason in the file.
+
+## The lint baseline
+
+`oxlint.baseline.json` records the diagnostics this package carried the day
+it adopted the v10 rulebook — 43 across 12 rules. From then on the count may
+only fall: a rule going up, a rule nobody recorded, or an entry that has
+reached zero all fail `make lint`. Nothing is recorded that a code change
+could have settled instead, so what remains is design the rulebook argues
+with — the no-op adapters' stateless methods, the console the pretty logger
+and the OTel bootstrap write to, the barrel every published package needs.
 
 ## The artefact convention
 

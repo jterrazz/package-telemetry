@@ -1,6 +1,6 @@
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
 
-import type { LoggerPort } from '../../ports/logger.port.js';
+import { type LoggerPort } from '../../ports/logger.port.js';
 
 type OtelLogger = ReturnType<typeof logs.getLogger>;
 

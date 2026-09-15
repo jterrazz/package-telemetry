@@ -12,17 +12,18 @@ let initialized = false;
 /**
  * Parse OTLP headers from the standard "Key1=Value1,Key2=Value2" format
  */
-function parseHeaders(headerString?: string): Record<string, string> | undefined {
-    if (!headerString) {
-        return undefined;
+function parseHeaders(headerString?: string): Record<string, string> {
+    const headers: Record<string, string> = {};
+
+    if (headerString === undefined || headerString === '') {
+        return headers;
     }
 
-    const headers: Record<string, string> = {};
     for (const pair of headerString.split(',')) {
         const eqIndex = pair.indexOf('=');
         if (eqIndex > 0) {
-            headers[pair.substring(0, eqIndex).trim()] = decodeURIComponent(
-                pair.substring(eqIndex + 1).trim(),
+            headers[pair.slice(0, eqIndex).trim()] = decodeURIComponent(
+                pair.slice(eqIndex + 1).trim(),
             );
         }
     }
@@ -53,7 +54,7 @@ export async function registerTelemetry(): Promise<void> {
     }
 
     const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-    if (!endpoint) {
+    if (endpoint === undefined || endpoint === '') {
         console.info('[Telemetry] No OTEL_EXPORTER_OTLP_ENDPOINT configured, export disabled');
         return;
     }
@@ -71,8 +72,8 @@ export async function registerTelemetry(): Promise<void> {
 
     // Parse deployment environment from OTEL_RESOURCE_ATTRIBUTES (injected by infra)
     const resourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ?? '';
-    const environmentMatch = resourceAttributes.match(
-        /deployment\.environment=(?<environment>[^,]+)/,
+    const environmentMatch = /deployment\.environment=(?<environment>[^,]+)/u.exec(
+        resourceAttributes,
     );
     const deploymentEnvironment =
         environmentMatch?.groups?.environment ?? process.env.NODE_ENV ?? 'development';

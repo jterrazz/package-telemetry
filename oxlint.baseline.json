@@ -1,0 +1,14 @@
+{
+    "eslint/class-methods-use-this": 16,
+    "eslint/complexity": 1,
+    "eslint/max-classes-per-file": 1,
+    "eslint/max-params": 1,
+    "eslint/no-console": 10,
+    "oxc/no-barrel-file": 1,
+    "promise/prefer-await-to-callbacks": 2,
+    "typescript/no-base-to-string": 1,
+    "typescript/no-misused-spread": 1,
+    "typescript/no-unnecessary-type-parameters": 1,
+    "typescript/no-unsafe-type-assertion": 6,
+    "typescript/require-await": 2
+}

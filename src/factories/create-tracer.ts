@@ -1,12 +1,12 @@
 import { OtelTracerAdapter } from '../adapters/tracer/otel-tracer.adapter.js';
-import type { TracerPort } from '../ports/tracer.port.js';
+import { type TracerPort } from '../ports/tracer.port.js';
 
-export interface CreateTracerOptions {
+export type CreateTracerOptions = {
     /** Tracer name (defaults to OTEL_SERVICE_NAME) */
     name?: string;
     /** Prefix applied to every span name: '{namespace}.{name}' */
     namespace?: string;
-}
+};
 
 /**
  * Create an OpenTelemetry-backed tracer. A no-op until the SDK is

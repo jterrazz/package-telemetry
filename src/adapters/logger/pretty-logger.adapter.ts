@@ -1,21 +1,21 @@
-import type { LoggerLevel, LoggerPort } from '../../ports/logger.port.js';
+import { type LoggerLevel, type LoggerPort } from '../../ports/logger.port.js';
 
 /**
  * ANSI color codes for terminal output
  */
 const colors = {
-    reset: '\x1b[0m',
-    dim: '\x1b[2m',
-    // Levels
-    debug: '\x1b[36m', // Cyan
-    info: '\x1b[32m', // Green
-    warn: '\x1b[33m', // Yellow
-    error: '\x1b[31m', // Red
-    // Props
-    key: '\x1b[90m', // Gray
-    string: '\x1b[36m', // Cyan
-    number: '\x1b[33m', // Yellow
-    boolean: '\x1b[35m', // Magenta
+    reset: '\u001B[0m',
+    dim: '\u001B[2m',
+    // Levels: cyan, green, yellow, red
+    debug: '\u001B[36m',
+    info: '\u001B[32m',
+    warn: '\u001B[33m',
+    error: '\u001B[31m',
+    // Props: gray key, cyan string, yellow number, magenta boolean
+    key: '\u001B[90m',
+    string: '\u001B[36m',
+    number: '\u001B[33m',
+    boolean: '\u001B[35m',
 };
 
 /**
@@ -109,7 +109,7 @@ export class PrettyLoggerAdapter implements LoggerPort {
 
         if (typeof value === 'string') {
             // Short strings without spaces: no quotes
-            if (value.length <= 20 && !/\s/.test(value)) {
+            if (value.length <= 20 && !/\s/u.test(value)) {
                 return `${colors.string}${value}${colors.reset}`;
             }
             // Longer or complex strings: use quotes
@@ -130,11 +130,7 @@ export class PrettyLoggerAdapter implements LoggerPort {
 
         if (Array.isArray(value)) {
             if (value.length <= 3) {
-                const items = value
-                    .map((item) => {
-                        return this.formatValue(item);
-                    })
-                    .join(', ');
+                const items = value.map((item) => this.formatValue(item)).join(', ');
                 return `[${items}]`;
             }
             return `${colors.dim}[${value.length} items]${colors.reset}`;
@@ -144,9 +140,10 @@ export class PrettyLoggerAdapter implements LoggerPort {
             const keys = Object.keys(value);
             if (keys.length <= 2) {
                 const items = keys
-                    .map((key) => {
-                        return `${key}:${this.formatValue((value as Record<string, unknown>)[key])}`;
-                    })
+                    .map(
+                        (key) =>
+                            `${key}:${this.formatValue((value as Record<string, unknown>)[key])}`,
+                    )
                     .join(' ');
                 return `{${items}}`;
             }

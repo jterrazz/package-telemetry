@@ -1,20 +1,20 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import type { LoggerPort } from '../../../ports/logger.port.js';
+import { type LoggerPort } from '../../../ports/logger.port.js';
 import { OtelLoggerAdapter } from '../otel-logger.adapter.js';
 
 function createInnerLogger(): LoggerPort {
     const logger: LoggerPort = {
-        child: vi.fn(() => logger),
-        debug: vi.fn(),
-        error: vi.fn(),
-        info: vi.fn(),
-        warn: vi.fn(),
+        child: vi.fn<LoggerPort['child']>(() => logger),
+        debug: vi.fn<LoggerPort['debug']>(),
+        error: vi.fn<LoggerPort['error']>(),
+        info: vi.fn<LoggerPort['info']>(),
+        warn: vi.fn<LoggerPort['warn']>(),
     };
     return logger;
 }
 
-describe('OtelLoggerAdapter', () => {
+describe('otelLoggerAdapter', () => {
     test('should forward every level to the wrapped logger', () => {
         // Given
         const inner = createInnerLogger();
