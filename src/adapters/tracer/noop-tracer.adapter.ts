@@ -1,5 +1,5 @@
-import { type TelemetryAttributes } from '../../ports/telemetry.port.js';
-import { type TracerPort, type TracerSpanOptions } from '../../ports/tracer.port.js';
+import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
+import type { TracerPort, TracerSpanOptions } from '../../ports/tracer.port.js';
 
 /**
  * No-op tracer adapter: spans execute their function directly, events and

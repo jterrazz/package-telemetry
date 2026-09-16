@@ -1,4 +1,5 @@
-import { context, type Span, SpanStatusCode, trace } from '@opentelemetry/api';
+import { context, SpanStatusCode, trace } from '@opentelemetry/api';
+import type { Span } from '@opentelemetry/api';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { OtelTracerAdapter } from '../otel-tracer.adapter.js';

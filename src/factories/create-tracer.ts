@@ -1,5 +1,5 @@
 import { OtelTracerAdapter } from '../adapters/tracer/otel-tracer.adapter.js';
-import { type TracerPort } from '../ports/tracer.port.js';
+import type { TracerPort } from '../ports/tracer.port.js';
 
 export type CreateTracerOptions = {
     /** Tracer name (defaults to OTEL_SERVICE_NAME) */

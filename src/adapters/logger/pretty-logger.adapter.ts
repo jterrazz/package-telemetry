@@ -1,4 +1,4 @@
-import { type LoggerLevel, type LoggerPort } from '../../ports/logger.port.js';
+import type { LoggerLevel, LoggerPort } from '../../ports/logger.port.js';
 
 /**
  * ANSI color codes for terminal output

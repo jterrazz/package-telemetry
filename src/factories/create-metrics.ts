@@ -1,5 +1,5 @@
 import { OtelMetricsAdapter } from '../adapters/metrics/otel-metrics.adapter.js';
-import { type MetricsPort, type TelemetryMetrics } from '../ports/metrics.port.js';
+import type { MetricsPort, TelemetryMetrics } from '../ports/metrics.port.js';
 
 export type CreateMetricsOptions = {
     /** Meter name (defaults to OTEL_SERVICE_NAME) */

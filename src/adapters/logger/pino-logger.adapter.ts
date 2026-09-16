@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import { type LoggerLevel, type LoggerPort } from '../../ports/logger.port.js';
+import type { LoggerLevel, LoggerPort } from '../../ports/logger.port.js';
 
 /**
  * Structured JSON logger backed by pino. This is the production adapter:

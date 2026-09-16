@@ -1,7 +1,7 @@
 import { OtelLoggerAdapter } from '../adapters/logger/otel-logger.adapter.js';
 import { PinoLoggerAdapter } from '../adapters/logger/pino-logger.adapter.js';
 import { PrettyLoggerAdapter } from '../adapters/logger/pretty-logger.adapter.js';
-import { type LoggerLevel, type LoggerPort } from '../ports/logger.port.js';
+import type { LoggerLevel, LoggerPort } from '../ports/logger.port.js';
 
 export type CreateLoggerOptions = {
     /** Minimum level to log (defaults to 'info') */

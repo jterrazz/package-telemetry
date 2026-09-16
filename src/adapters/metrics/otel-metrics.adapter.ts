@@ -1,20 +1,14 @@
-import {
-    type Attributes,
-    type Counter,
-    type Gauge,
-    type Histogram,
-    type Meter,
-    metrics,
-} from '@opentelemetry/api';
+import { metrics } from '@opentelemetry/api';
+import type { Attributes, Counter, Gauge, Histogram, Meter } from '@opentelemetry/api';
 
-import {
-    type MetricsCounterOptions,
-    type MetricsObserve,
-    type MetricsPort,
-    type MetricsRecordOptions,
-    type TelemetryMetrics,
+import type {
+    MetricsCounterOptions,
+    MetricsObserve,
+    MetricsPort,
+    MetricsRecordOptions,
+    TelemetryMetrics,
 } from '../../ports/metrics.port.js';
-import { type TelemetryAttributes } from '../../ports/telemetry.port.js';
+import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
 
 function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
     if (!attributes) {

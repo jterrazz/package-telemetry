@@ -1,4 +1,4 @@
-import { type TelemetryAttributes } from './telemetry.port.js';
+import type { TelemetryAttributes } from './telemetry.port.js';
 
 /**
  * Tracer port - defines how to trace operations as spans, independently of

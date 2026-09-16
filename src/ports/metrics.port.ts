@@ -1,4 +1,4 @@
-import { type TelemetryAttributes } from './telemetry.port.js';
+import type { TelemetryAttributes } from './telemetry.port.js';
 
 /**
  * Metrics port - defines how to record counters, histograms and gauges,

@@ -1,9 +1,9 @@
-import {
-    type MetricsCounterOptions,
-    type MetricsObserve,
-    type MetricsPort,
-    type MetricsRecordOptions,
-    type TelemetryMetrics,
+import type {
+    MetricsCounterOptions,
+    MetricsObserve,
+    MetricsPort,
+    MetricsRecordOptions,
+    TelemetryMetrics,
 } from '../../ports/metrics.port.js';
 
 /**

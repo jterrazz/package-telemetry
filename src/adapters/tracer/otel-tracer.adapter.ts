@@ -1,7 +1,8 @@
-import { type Attributes, SpanStatusCode, trace, type Tracer } from '@opentelemetry/api';
+import { SpanStatusCode, trace } from '@opentelemetry/api';
+import type { Attributes, Tracer } from '@opentelemetry/api';
 
-import { type TelemetryAttributes } from '../../ports/telemetry.port.js';
-import { type TracerPort, type TracerSpanOptions } from '../../ports/tracer.port.js';
+import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
+import type { TracerPort, TracerSpanOptions } from '../../ports/tracer.port.js';
 
 function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
     if (!attributes) {
