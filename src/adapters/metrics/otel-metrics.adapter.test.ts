@@ -1,5 +1,5 @@
 import { metrics } from '@opentelemetry/api';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { OtelMetricsAdapter } from './otel-metrics.adapter.js';
 
@@ -27,17 +27,24 @@ function registerFakeMeterProvider() {
     metrics.setGlobalMeterProvider({
         getMeter: () => meter,
     } as never);
-    return { counter, gauge, histogram, meter, observableCallbacks, observableGauge };
+    return {
+        counter,
+        gauge,
+        histogram,
+        meter,
+        observableCallbacks,
+        observableGauge,
+        // The global provider is process-wide state: disposal gives it back.
+        [Symbol.dispose]: () => {
+            metrics.disable();
+        },
+    };
 }
 
 describe('otelMetricsAdapter', () => {
-    afterEach(() => {
-        metrics.disable();
-    });
-
     test('should increment a counter with default value 1', () => {
         // Given - a registered meter provider and a fresh adapter
-        const fake = registerFakeMeterProvider();
+        using fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
         // When
@@ -50,7 +57,7 @@ describe('otelMetricsAdapter', () => {
 
     test('should qualify metric names with the namespace', () => {
         // Given - an adapter configured with a namespace
-        const fake = registerFakeMeterProvider();
+        using fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter({ namespace: 'signews' });
 
         // When
@@ -66,7 +73,7 @@ describe('otelMetricsAdapter', () => {
 
     test('should reuse instruments across calls', () => {
         // Given - a registered meter provider and a fresh adapter
-        const fake = registerFakeMeterProvider();
+        using fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
         // When
@@ -81,7 +88,7 @@ describe('otelMetricsAdapter', () => {
 
     test('should strip undefined attribute values', () => {
         // Given - a registered meter provider and a fresh adapter
-        const fake = registerFakeMeterProvider();
+        using fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
         // When
@@ -93,7 +100,7 @@ describe('otelMetricsAdapter', () => {
 
     test('should observe values with attributes through an observable gauge', () => {
         // Given - a registered meter provider and a namespaced adapter
-        const fake = registerFakeMeterProvider();
+        using fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter({ namespace: 'app' });
 
         // When — register, then simulate an export-interval collection
@@ -114,7 +121,7 @@ describe('otelMetricsAdapter', () => {
 
     test('should ignore duplicate observable gauge registrations', () => {
         // Given - a registered meter provider and a fresh adapter
-        const fake = registerFakeMeterProvider();
+        using fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
         // When
