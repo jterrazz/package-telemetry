@@ -1,8 +1,9 @@
 # Testing
 
-What proves a change here is a colocated vitest suite, one `__tests__/`
-folder per adapter or factory directory — there is no `specs/` product suite
-in this repository today.
+What proves a change here is a module test beside the module it covers —
+`<file>.test.ts` next to `<file>.ts`, never a `__tests__/` folder (rule I2)
+— collected by the single `unit()` project `vitest.config.ts` declares.
+There is no `specs/` product suite in this repository today.
 
 ```bash
 npm test   # vitest --run
@@ -10,20 +11,24 @@ npm test   # vitest --run
 
 ## What is covered
 
-Six suites, each beside the code it proves:
+Nine suites, each beside the code it proves:
 
-| Suite                                                         | Proves                                                                                                  |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `src/adapters/logger/__tests__/pino-logger.adapter.test.ts`   | structured JSON output, level, message, meta                                                            |
-| `src/adapters/logger/__tests__/pretty-logger.adapter.test.ts` | the colored development format                                                                          |
-| `src/adapters/logger/__tests__/otel-logger.adapter.test.ts`   | dual-emit to the wrapped logger and to OTLP                                                             |
-| `src/adapters/tracer/__tests__/otel-tracer.adapter.test.ts`   | span lifecycle, attributes, error capture                                                               |
-| `src/adapters/metrics/__tests__/otel-metrics.adapter.test.ts` | counter/histogram/gauge/observableGauge recording                                                       |
-| `src/factories/__tests__/factories.test.ts`                   | `createLogger`/`createTracer`/`createMetrics` pick the right adapter from options and `OTEL_*` env vars |
+| Suite                                               | Proves                                                                          |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `src/adapters/logger/pino-logger.adapter.test.ts`   | structured JSON output, level, message, meta                                    |
+| `src/adapters/logger/pretty-logger.adapter.test.ts` | the colored development format                                                  |
+| `src/adapters/logger/otel-logger.adapter.test.ts`   | dual-emit to the wrapped logger and to OTLP                                     |
+| `src/adapters/logger/noop-logger.adapter.test.ts`   | every call is a safe no-op                                                      |
+| `src/adapters/tracer/otel-tracer.adapter.test.ts`   | span lifecycle, attributes, error capture                                       |
+| `src/adapters/metrics/otel-metrics.adapter.test.ts` | counter/histogram/gauge/observableGauge recording                               |
+| `src/factories/create-logger.test.ts`               | `createLogger` picks the right adapter from options and `OTEL_*` env vars       |
+| `src/factories/create-tracer.test.ts`               | `createTracer` returns the OTel-backed tracer                                   |
+| `src/factories/create-metrics.test.ts`              | `createMetrics` returns the OTel-backed recorder, and accepts a typed catalogue |
 
-The `NoopLoggerAdapter`, `NoopTracerAdapter` and `NoopMetricsAdapter` carry
-no test of their own — each is a fixed no-op return, with nothing to prove
-beyond what the type checker already holds.
+`NoopTracerAdapter` and `NoopMetricsAdapter` carry no test of their own —
+each is a fixed no-op return, with nothing to prove beyond what the type
+checker already holds. `NoopLoggerAdapter` is the exception: `child()`
+returns `this` rather than a fixed value, which is worth one test.
 
 ## Why the OTel adapters need no mocking
 
