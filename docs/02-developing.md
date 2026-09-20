@@ -29,6 +29,9 @@ The `Makefile` targets all depend on a `node_modules/.install` marker keyed
 on `package-lock.json`, so `make build`, `make lint` and `make test` each
 run `npm ci` once if the lockfile changed since the last install.
 
+`make build` precedes `make lint` on a fresh checkout: `typescript check`'s
+Publish (packaging) pass reads `dist/`, absent until the build has run once.
+
 ## Configuration
 
 Every tool config names a preset from `@jterrazz/typescript` or
