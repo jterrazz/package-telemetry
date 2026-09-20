@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { PrettyLoggerAdapter } from '../pretty-logger.adapter.js';
+import { PrettyLoggerAdapter } from './pretty-logger.adapter.js';
 
 /** The line the adapter printed — throws when it printed nothing. */
 function printedLine(): string {
@@ -24,13 +24,13 @@ describe('prettyLoggerAdapter', () => {
     });
 
     test('should print level, message and inline props', () => {
-        // Given
+        // Given - a logger set to the info level
         const logger = new PrettyLoggerAdapter({ level: 'info' });
 
         // When
         logger.info('server.started', { port: 3000 });
 
-        // Then
+        // Then - the printed line carries the level, message and inline props
         const output = printedLine();
         expect(output).toContain('INFO');
         expect(output).toContain('server.started');
@@ -39,38 +39,38 @@ describe('prettyLoggerAdapter', () => {
     });
 
     test('should route errors to console.error', () => {
-        // Given
+        // Given - a logger set to the info level
         const logger = new PrettyLoggerAdapter({ level: 'info' });
 
         // When
         logger.error('request.failed');
 
-        // Then
+        // Then - the error is routed to console.error, not console.log
         expect(console.error).toHaveBeenCalledOnce();
         expect(console.log).not.toHaveBeenCalled();
     });
 
     test('should respect the minimum level, including silent', () => {
-        // Given
+        // Given - a logger set to the silent level
         const logger = new PrettyLoggerAdapter({ level: 'silent' });
 
         // When
         logger.error('hidden');
         logger.info('hidden');
 
-        // Then
+        // Then - nothing is printed at any level
         expect(console.log).not.toHaveBeenCalled();
         expect(console.error).not.toHaveBeenCalled();
     });
 
     test('should merge child bindings into props', () => {
-        // Given
+        // Given - a logger set to the info level
         const logger = new PrettyLoggerAdapter({ level: 'info' });
 
         // When
         logger.child({ requestId: 'r-42' }).info('with context');
 
-        // Then
+        // Then - the child's bindings appear in the printed props
         const output = printedLine();
         expect(output).toContain('requestId');
         expect(output).toContain('r-42');

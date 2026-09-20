@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { PinoLoggerAdapter } from '../pino-logger.adapter.js';
+import { PinoLoggerAdapter } from './pino-logger.adapter.js';
 
 function createCapture() {
     const lines: string[] = [];
@@ -27,14 +27,14 @@ function createCapture() {
 
 describe('pinoLoggerAdapter', () => {
     test('should log structured JSON with level, message and meta', () => {
-        // Given
+        // Given - a logger writing to a captured stream
         const capture = createCapture();
         const logger = new PinoLoggerAdapter({ destination: capture.stream, level: 'debug' });
 
         // When
         logger.info('Test message', { userId: 123 });
 
-        // Then
+        // Then - the captured line carries the level, message and meta
         const log = capture.read<{
             level: string;
             meta: { userId: number };
@@ -46,14 +46,14 @@ describe('pinoLoggerAdapter', () => {
     });
 
     test('should serialize errors with message and stack', () => {
-        // Given
+        // Given - a logger writing to a captured stream
         const capture = createCapture();
         const logger = new PinoLoggerAdapter({ destination: capture.stream, level: 'debug' });
 
         // When
         logger.error('Something failed', { error: new Error('boom'), requestId: 'r-1' });
 
-        // Then
+        // Then - the error's message and stack are serialized alongside the meta
         const log = capture.read<{
             error: { message: string; stack: string };
             level: string;
@@ -66,7 +66,7 @@ describe('pinoLoggerAdapter', () => {
     });
 
     test('should respect the minimum level', () => {
-        // Given
+        // Given - a logger set to the warn level
         const capture = createCapture();
         const logger = new PinoLoggerAdapter({ destination: capture.stream, level: 'warn' });
 
@@ -75,19 +75,19 @@ describe('pinoLoggerAdapter', () => {
         logger.info('hidden');
         logger.warn('visible');
 
-        // Then
+        // Then - only the line at or above the minimum level is captured
         expect(capture.lines).toHaveLength(1);
     });
 
     test('should carry child bindings on every log', () => {
-        // Given
+        // Given - a logger writing to a captured stream
         const capture = createCapture();
         const logger = new PinoLoggerAdapter({ destination: capture.stream, level: 'info' });
 
         // When
         logger.child({ requestId: 'r-42' }).info('with context');
 
-        // Then
+        // Then - the child's bindings appear on the captured line
         const log = capture.read<{ requestId: string }>();
         expect(log.requestId).toBe('r-42');
     });
