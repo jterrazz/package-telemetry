@@ -1,6 +1,6 @@
 import { context, SpanStatusCode, trace } from '@opentelemetry/api';
 import type { Span } from '@opentelemetry/api';
-import { afterEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { OtelTracerAdapter } from './otel-tracer.adapter.js';
 
@@ -20,18 +20,22 @@ function registerFakeTracerProvider() {
     trace.setGlobalTracerProvider({
         getTracer: () => tracer,
     } as never);
-    return { span, tracer };
+    return {
+        span,
+        tracer,
+        // The global provider and context manager are process-wide state:
+        // disposal gives both back.
+        [Symbol.dispose]: () => {
+            trace.disable();
+            context.disable();
+        },
+    };
 }
 
 describe('otelTracerAdapter', () => {
-    afterEach(() => {
-        trace.disable();
-        context.disable();
-    });
-
     test('should run the function inside a span and mark it OK', async () => {
         // Given - a registered tracer provider and a fresh adapter
-        const fake = registerFakeTracerProvider();
+        using fake = registerFakeTracerProvider();
         const tracer = new OtelTracerAdapter();
 
         // When
@@ -52,7 +56,7 @@ describe('otelTracerAdapter', () => {
 
     test('should record the error, mark the span failed and rethrow', async () => {
         // Given - a registered tracer provider, a fresh adapter and a failing function
-        const fake = registerFakeTracerProvider();
+        using fake = registerFakeTracerProvider();
         const tracer = new OtelTracerAdapter();
         const failure = new Error('boom');
 
@@ -72,7 +76,7 @@ describe('otelTracerAdapter', () => {
 
     test('should qualify span names with the namespace', async () => {
         // Given - an adapter configured with a namespace
-        const fake = registerFakeTracerProvider();
+        using fake = registerFakeTracerProvider();
         const tracer = new OtelTracerAdapter({ namespace: 'signews' });
 
         // When

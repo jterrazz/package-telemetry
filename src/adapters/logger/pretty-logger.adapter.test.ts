@@ -1,6 +1,12 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { PrettyLoggerAdapter } from './pretty-logger.adapter.js';
+
+/** Captures what the adapter prints; the preset's `restoreMocks` gives the console back. */
+function givenSilencedConsole(): void {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+}
 
 /** The line the adapter printed — throws when it printed nothing. */
 function printedLine(): string {
@@ -14,17 +20,9 @@ function printedLine(): string {
 }
 
 describe('prettyLoggerAdapter', () => {
-    beforeEach(() => {
-        vi.spyOn(console, 'log').mockImplementation(() => {});
-        vi.spyOn(console, 'error').mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
-    });
-
     test('should print level, message and inline props', () => {
-        // Given - a logger set to the info level
+        // Given - a silenced console and a logger set to the info level
+        givenSilencedConsole();
         const logger = new PrettyLoggerAdapter({ level: 'info' });
 
         // When
@@ -39,7 +37,8 @@ describe('prettyLoggerAdapter', () => {
     });
 
     test('should route errors to console.error', () => {
-        // Given - a logger set to the info level
+        // Given - a silenced console and a logger set to the info level
+        givenSilencedConsole();
         const logger = new PrettyLoggerAdapter({ level: 'info' });
 
         // When
@@ -51,7 +50,8 @@ describe('prettyLoggerAdapter', () => {
     });
 
     test('should respect the minimum level, including silent', () => {
-        // Given - a logger set to the silent level
+        // Given - a silenced console and a logger set to the silent level
+        givenSilencedConsole();
         const logger = new PrettyLoggerAdapter({ level: 'silent' });
 
         // When
@@ -64,7 +64,8 @@ describe('prettyLoggerAdapter', () => {
     });
 
     test('should merge child bindings into props', () => {
-        // Given - a logger set to the info level
+        // Given - a silenced console and a logger set to the info level
+        givenSilencedConsole();
         const logger = new PrettyLoggerAdapter({ level: 'info' });
 
         // When
