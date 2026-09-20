@@ -31,8 +31,8 @@ run `npm ci` once if the lockfile changed since the last install.
 
 ## Configuration
 
-Every tool config names one `@jterrazz/typescript` preset and stops there —
-nothing is configured twice.
+Every tool config names a preset from `@jterrazz/typescript` or
+`@jterrazz/test` and stops there — nothing is configured twice.
 
 The profile is `library`: the one a package published to a registry names,
 and the one whose tsconfig turns on `isolatedDeclarations` and
@@ -42,9 +42,16 @@ no enum, namespace or parameter property survives into the declarations.
 - `tsconfig.json` extends `@jterrazz/typescript/tsconfig/library`, and
   carries nothing else — a local `compilerOption` would settle for this
   package alone what the preset owes every package.
-- `oxlint.config.ts` is `defineConfig(library)`, typed as `OxlintConfig`
-  because `isolatedDeclarations` refuses an inferred default export.
+- `oxlint.config.ts` is `defineConfig(compose(library, testing))`, typed as
+  `OxlintConfig` because `isolatedDeclarations` refuses an inferred default
+  export — `library` is this package's profile, `testing` is
+  `@jterrazz/test`'s fragment for the conventions every suite of the estate
+  answers to.
 - `oxfmt.config.ts` is `defineConfig(base)`, typed the same way.
+- `vitest.config.ts` is `defineSpecConfig({ test: { projects: [unit()] } })`
+  from `@jterrazz/test/vitest` — the one project this package needs, since
+  every suite is a module test beside its module and none reaches a
+  service or a browser.
 - `tsdown.config.js` spreads the `bundle` preset across two entries: the
   barrel (`src/index.ts`, CJS + ESM) and `src/register.ts` (ESM-only,
   `clean: false` so it does not wipe the barrel's output). It is JavaScript
@@ -74,12 +81,12 @@ plus `dist` (the published product, not an artefact) and `node_modules`.
 
 ## Where a new file goes
 
-| Adding…                            | Goes in                                                                                           |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------- |
-| a new port                         | `src/ports/<name>.port.ts`                                                                        |
-| a new adapter for an existing port | `src/adapters/<pillar>/<tool>-<pillar>.adapter.ts`, plus a colocated `__tests__/`                 |
-| a new factory                      | `src/factories/create-<pillar>.ts`                                                                |
-| a public re-export                 | `src/index.ts` (barrel) — never a new subpath without also declaring it in `package.json#exports` |
+| Adding…                            | Goes in                                                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| a new port                         | `src/ports/<name>.port.ts`                                                                           |
+| a new adapter for an existing port | `src/adapters/<pillar>/<tool>-<pillar>.adapter.ts`, plus a sibling `<tool>-<pillar>.adapter.test.ts` |
+| a new factory                      | `src/factories/create-<pillar>.ts`                                                                   |
+| a public re-export                 | `src/index.ts` (barrel) — never a new subpath without also declaring it in `package.json#exports`    |
 
 Every export new or changed reaches the root `README.md` and the
 `skills/jterrazz-telemetry/` skill in the same change: neither is generated,
