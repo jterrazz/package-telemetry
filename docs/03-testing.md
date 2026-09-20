@@ -30,14 +30,24 @@ each is a fixed no-op return, with nothing to prove beyond what the type
 checker already holds. `NoopLoggerAdapter` is the exception: `child()`
 returns `this` rather than a fixed value, which is worth one test.
 
-## Why the OTel adapters need no mocking
+## What the OTel suites stand on
 
 `OtelLoggerAdapter`, `OtelTracerAdapter` and `OtelMetricsAdapter` call only
 `@opentelemetry/api`, which resolves to a safe no-op provider until
-`registerTelemetry()` runs ([Architecture](01-architecture.md)). Nothing in
-this package's own suites registers the SDK, so every OTel-backed test
-exercises the real adapter code against the real API's no-op path — no
-provider double, no network stub.
+`registerTelemetry()` runs ([Architecture](01-architecture.md)). No suite here
+starts the SDK, so no exporter, no collector and no network stub appears in
+any of them, and each of the three keeps one test on the unregistered path —
+the one production runs until `registerTelemetry()` is called.
+
+Two of the three need a provider to observe what they did. The logger's suite
+reads the wrapped logger it was handed, but a span and an instrument are only
+reachable through the provider that made them, so
+`otel-tracer.adapter.test.ts` and `otel-metrics.adapter.test.ts` register a
+fake one on the global API — `trace.setGlobalTracerProvider`,
+`metrics.setGlobalMeterProvider`. That global is process-wide state, and the
+registering function gives it back itself: it returns a `Symbol.dispose`, each
+test declares it with `using`, and the provider is disabled where it was
+registered rather than in a hook the reader has to scroll up to find.
 
 ## The self-lint
 
