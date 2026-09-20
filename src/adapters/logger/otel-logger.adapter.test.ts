@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import type { LoggerPort } from '../../../ports/logger.port.js';
-import { OtelLoggerAdapter } from '../otel-logger.adapter.js';
+import type { LoggerPort } from '../../ports/logger.port.js';
+import { OtelLoggerAdapter } from './otel-logger.adapter.js';
 
 function createInnerLogger(): LoggerPort {
     const logger: LoggerPort = {
@@ -16,7 +16,7 @@ function createInnerLogger(): LoggerPort {
 
 describe('otelLoggerAdapter', () => {
     test('should forward every level to the wrapped logger', () => {
-        // Given
+        // Given - an adapter wrapping an inner logger
         const inner = createInnerLogger();
         const logger = new OtelLoggerAdapter(inner);
 
@@ -26,7 +26,7 @@ describe('otelLoggerAdapter', () => {
         logger.warn('w');
         logger.error('e');
 
-        // Then — the OTEL side is a no-op without SDK, stdout side must work
+        // Then - the OTEL side is a no-op without SDK, so the wrapped logger must receive every call
         expect(inner.debug).toHaveBeenCalledWith('d', { a: 1 });
         expect(inner.info).toHaveBeenCalledWith('i', undefined);
         expect(inner.warn).toHaveBeenCalledWith('w', undefined);
@@ -34,7 +34,7 @@ describe('otelLoggerAdapter', () => {
     });
 
     test('should forward child bindings to the wrapped logger', () => {
-        // Given
+        // Given - an adapter wrapping an inner logger
         const inner = createInnerLogger();
         const logger = new OtelLoggerAdapter(inner);
 
@@ -42,20 +42,20 @@ describe('otelLoggerAdapter', () => {
         const child = logger.child({ requestId: 'r-1' });
         child.info('scoped');
 
-        // Then
+        // Then - the child's bindings reach the wrapped logger
         expect(inner.child).toHaveBeenCalledWith({ requestId: 'r-1' });
         expect(inner.info).toHaveBeenCalledWith('scoped', undefined);
     });
 
     test('should accumulate bindings across nested children', () => {
-        // Given
+        // Given - an adapter wrapping an inner logger
         const inner = createInnerLogger();
         const logger = new OtelLoggerAdapter(inner);
 
         // When
         logger.child({ a: 1 }).child({ b: 2 }).info('nested');
 
-        // Then
+        // Then - each nesting's bindings reach the wrapped logger
         expect(inner.child).toHaveBeenCalledWith({ a: 1 });
         expect(inner.child).toHaveBeenCalledWith({ b: 2 });
         expect(inner.info).toHaveBeenCalledWith('nested', undefined);

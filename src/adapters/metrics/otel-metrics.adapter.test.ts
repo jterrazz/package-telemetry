@@ -1,7 +1,7 @@
 import { metrics } from '@opentelemetry/api';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { OtelMetricsAdapter } from '../otel-metrics.adapter.js';
+import { OtelMetricsAdapter } from './otel-metrics.adapter.js';
 
 type Measure = (value: number, attributes?: Record<string, unknown>) => void;
 type ObservableCallback = (result: { observe: Measure }) => void;
@@ -36,20 +36,20 @@ describe('otelMetricsAdapter', () => {
     });
 
     test('should increment a counter with default value 1', () => {
-        // Given
+        // Given - a registered meter provider and a fresh adapter
         const fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
         // When
         adapter.counter('task.started', { attributes: { task: 'pipeline' } });
 
-        // Then
+        // Then - the counter is created and incremented by 1
         expect(fake.meter.createCounter).toHaveBeenCalledWith('task.started');
         expect(fake.counter.add).toHaveBeenCalledWith(1, { task: 'pipeline' });
     });
 
     test('should qualify metric names with the namespace', () => {
-        // Given
+        // Given - an adapter configured with a namespace
         const fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter({ namespace: 'signews' });
 
@@ -58,14 +58,14 @@ describe('otelMetricsAdapter', () => {
         adapter.histogram('task.duration', 125, { attributes: { task: 'pipeline' } });
         adapter.gauge('queue.depth', 7);
 
-        // Then
+        // Then - every instrument name is prefixed with the namespace
         expect(fake.meter.createCounter).toHaveBeenCalledWith('signews.task.started');
         expect(fake.meter.createHistogram).toHaveBeenCalledWith('signews.task.duration');
         expect(fake.meter.createGauge).toHaveBeenCalledWith('signews.queue.depth');
     });
 
     test('should reuse instruments across calls', () => {
-        // Given
+        // Given - a registered meter provider and a fresh adapter
         const fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
@@ -73,26 +73,26 @@ describe('otelMetricsAdapter', () => {
         adapter.counter('task.completed', { attributes: { task: 'a' } });
         adapter.counter('task.completed', { attributes: { task: 'b' }, value: 3 });
 
-        // Then
+        // Then - the same counter is created once and reused for both calls
         expect(fake.meter.createCounter).toHaveBeenCalledOnce();
         expect(fake.counter.add).toHaveBeenCalledWith(1, { task: 'a' });
         expect(fake.counter.add).toHaveBeenCalledWith(3, { task: 'b' });
     });
 
     test('should strip undefined attribute values', () => {
-        // Given
+        // Given - a registered meter provider and a fresh adapter
         const fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
         // When
         adapter.counter('task.failed', { attributes: { reason: undefined, task: 'x' } });
 
-        // Then
+        // Then - the undefined attribute is dropped rather than forwarded
         expect(fake.counter.add).toHaveBeenCalledWith(1, { task: 'x' });
     });
 
     test('should observe values with attributes through an observable gauge', () => {
-        // Given
+        // Given - a registered meter provider and a namespaced adapter
         const fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter({ namespace: 'app' });
 
@@ -106,14 +106,14 @@ describe('otelMetricsAdapter', () => {
             collect({ observe });
         }
 
-        // Then
+        // Then - the gauge is created once, and every observed value is forwarded
         expect(fake.meter.createObservableGauge).toHaveBeenCalledWith('app.eventloop.lag.ms');
         expect(observe).toHaveBeenCalledWith(1.5, { stat: 'mean' });
         expect(observe).toHaveBeenCalledWith(9.9, { stat: 'p99' });
     });
 
     test('should ignore duplicate observable gauge registrations', () => {
-        // Given
+        // Given - a registered meter provider and a fresh adapter
         const fake = registerFakeMeterProvider();
         const adapter = new OtelMetricsAdapter();
 
@@ -121,16 +121,16 @@ describe('otelMetricsAdapter', () => {
         adapter.observableGauge('queue.depth', () => {});
         adapter.observableGauge('queue.depth', () => {});
 
-        // Then
+        // Then - the gauge and its callback are registered only once
         expect(fake.meter.createObservableGauge).toHaveBeenCalledOnce();
         expect(fake.observableGauge.addCallback).toHaveBeenCalledOnce();
     });
 
     test('should be a safe no-op without a registered SDK', () => {
-        // Given
+        // Given - a namespaced adapter with no meter provider registered
         const adapter = new OtelMetricsAdapter({ namespace: 'app' });
 
-        // When / Then
+        // Then - every call resolves against the API's no-op path
         expect(() => {
             adapter.counter('task.started', { attributes: { task: 'noop' } });
             adapter.gauge('queue.depth', 1);

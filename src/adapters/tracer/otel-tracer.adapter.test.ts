@@ -2,7 +2,7 @@ import { context, SpanStatusCode, trace } from '@opentelemetry/api';
 import type { Span } from '@opentelemetry/api';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { OtelTracerAdapter } from '../otel-tracer.adapter.js';
+import { OtelTracerAdapter } from './otel-tracer.adapter.js';
 
 function registerFakeTracerProvider() {
     const span = {
@@ -30,7 +30,7 @@ describe('otelTracerAdapter', () => {
     });
 
     test('should run the function inside a span and mark it OK', async () => {
-        // Given
+        // Given - a registered tracer provider and a fresh adapter
         const fake = registerFakeTracerProvider();
         const tracer = new OtelTracerAdapter();
 
@@ -39,7 +39,7 @@ describe('otelTracerAdapter', () => {
             attributes: { stage: 'ingest' },
         });
 
-        // Then
+        // Then - the function's result is returned and the span is marked OK
         expect(result).toBe('done');
         expect(fake.tracer.startActiveSpan).toHaveBeenCalledWith(
             'pipeline.run',
@@ -51,12 +51,12 @@ describe('otelTracerAdapter', () => {
     });
 
     test('should record the error, mark the span failed and rethrow', async () => {
-        // Given
+        // Given - a registered tracer provider, a fresh adapter and a failing function
         const fake = registerFakeTracerProvider();
         const tracer = new OtelTracerAdapter();
         const failure = new Error('boom');
 
-        // When / Then
+        // Then - the error is rethrown, recorded and the span is marked failed
         await expect(
             tracer.span('pipeline.run', async () => {
                 throw failure;
@@ -71,14 +71,14 @@ describe('otelTracerAdapter', () => {
     });
 
     test('should qualify span names with the namespace', async () => {
-        // Given
+        // Given - an adapter configured with a namespace
         const fake = registerFakeTracerProvider();
         const tracer = new OtelTracerAdapter({ namespace: 'signews' });
 
         // When
         await tracer.span('pipeline.run', async () => {});
 
-        // Then
+        // Then - the span name is prefixed with the namespace
         expect(fake.tracer.startActiveSpan).toHaveBeenCalledWith(
             'signews.pipeline.run',
             { attributes: {} },
@@ -87,10 +87,10 @@ describe('otelTracerAdapter', () => {
     });
 
     test('should drop events and attributes without an active span', () => {
-        // Given
+        // Given - an adapter with no tracer provider registered
         const tracer = new OtelTracerAdapter();
 
-        // When / Then
+        // Then - recording an event or an attribute is a safe no-op
         expect(() => {
             tracer.event('cache.miss', { key: 'a' });
             tracer.setAttribute('user.id', 42);
