@@ -1,26 +1,7 @@
 {
-    "src/adapters/logger/noop-logger.adapter.test.ts": {
-        "jterrazz/one-describe-per-file": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
-        }
-    },
     "src/adapters/logger/noop-logger.adapter.ts": {
         "jterrazz-typescript/comment-states-its-kind": {
             "count": 5
-        }
-    },
-    "src/adapters/logger/otel-logger.adapter.test.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 3
-        },
-        "jterrazz/one-describe-per-file": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
         }
     },
     "src/adapters/logger/otel-logger.adapter.ts": {
@@ -34,43 +15,12 @@
             "count": 1
         }
     },
-    "src/adapters/logger/pino-logger.adapter.test.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 4
-        },
-        "jterrazz/one-describe-per-file": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
-        },
-        "typescript/no-unnecessary-type-parameters": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/adapters/logger/pino-logger.adapter.ts": {
         "jterrazz-typescript/comment-states-its-kind": {
             "count": 1
         },
         "typescript/no-misused-spread": {
             "count": 1
-        }
-    },
-    "src/adapters/logger/pretty-logger.adapter.test.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 4
-        },
-        "jterrazz/one-describe-per-file": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
-        },
-        "no-console": {
-            "count": 5
         }
     },
     "src/adapters/logger/pretty-logger.adapter.ts": {
@@ -92,20 +42,6 @@
             "count": 5
         }
     },
-    "src/adapters/metrics/otel-metrics.adapter.test.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 7
-        },
-        "jterrazz/one-describe-per-file": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/adapters/metrics/otel-metrics.adapter.ts": {
         "jterrazz-typescript/comment-states-its-kind": {
             "count": 1
@@ -119,34 +55,9 @@
             "count": 3
         }
     },
-    "src/adapters/tracer/otel-tracer.adapter.test.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 3
-        },
-        "jterrazz/one-describe-per-file": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        }
-    },
     "src/adapters/tracer/otel-tracer.adapter.ts": {
         "jterrazz-typescript/comment-states-its-kind": {
             "count": 3
-        }
-    },
-    "src/factories/create-logger.test.ts": {
-        "jterrazz-typescript/comment-no-longer-than-its-function": {
-            "count": 1
-        },
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        },
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
         }
     },
     "src/factories/create-logger.ts": {
@@ -154,18 +65,8 @@
             "count": 3
         }
     },
-    "src/factories/create-metrics.test.ts": {
-        "jterrazz/test-in-its-tests-folder": {
-            "count": 1
-        }
-    },
     "src/factories/create-metrics.ts": {
         "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        }
-    },
-    "src/factories/create-tracer.test.ts": {
-        "jterrazz/test-in-its-tests-folder": {
             "count": 1
         }
     },

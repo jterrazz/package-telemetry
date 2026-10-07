@@ -16,7 +16,8 @@ lint: build
 fix: node_modules/.install
 	npx typescript fix
 
-test: node_modules/.install
+# The specs install the tarball npm pack writes from dist/.
+test: build
 	npm test
 
 mutation: build
