@@ -29,3 +29,10 @@ logger.error('request.failed', { error });
 const bare = new PrettyLoggerAdapter();
 bare.debug('hidden');
 bare.info('ready');
+
+const quiet = createLogger({ level: 'warn' });
+quiet.info('hidden');
+quiet.warn('queue.full');
+const silent = createLogger({ level: 'silent' });
+silent.warn('hidden');
+silent.error('hidden');

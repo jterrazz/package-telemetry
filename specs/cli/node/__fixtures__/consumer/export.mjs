@@ -22,6 +22,7 @@ logger.warn('stock.low', {
 });
 const declined = Object.assign(new Error('declined'), { stack: undefined });
 logger.error('payment.failed', { attempt: 2, cause: declined });
+createLogger({ otlp: false, pretty: true }).error('local.only');
 
 const recorder = createMetrics({ namespace: 'shop' });
 recorder.counter('orders.placed', { attributes: { channel: 'web' } });

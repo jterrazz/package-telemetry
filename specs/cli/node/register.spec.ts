@@ -39,7 +39,7 @@ describe('register', () => {
     });
 
     test('logs, metrics and spans reach the collector the environment names', async () => {
-        // Given - a collector, its headers and the deployment named by the environment, and an application recording one of each signal
+        // Given - a collector, its headers and the deployment named by the environment, an application recording one of each signal, and a logger it builds with otlp off
         await using collector = await startCollector();
         const result = await cli
             .fixture(directory('./__fixtures__/consumer/'))
@@ -56,7 +56,7 @@ describe('register', () => {
                 waitFor: 'flushed',
             });
 
-        // Then - every signal arrives namespaced, with its attributes and the service's identity on each signal's resource, through the configured headers
+        // Then - every signal arrives namespaced, with its attributes and the service's identity on each signal's resource, through the configured headers, and the line of the logger built with otlp off reaches stderr only
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             [Telemetry] Initialized {
@@ -69,6 +69,9 @@ describe('register', () => {
             {"level":"warn","time":{{int}},"pid":{{int}},"hostname":"{{string}}","error":{"message":"boom","stack":"Error: boom\\n    at checkout (cart.mjs:1:1)"},"meta":{"reserved":{"units":4},"sku":null,"stock":10},"msg":"stock.low"}
             {"level":"error","time":{{int}},"pid":{{int}},"hostname":"{{string}}","meta":{"attempt":2,"cause":{}},"msg":"payment.failed"}
             flushed
+        `);
+        expect(text(result.stderr.raw.replaceAll('\u001B', String.raw`\e`))).toMatch(`
+            \\e[31mERROR\\e[0m \\e[2m[{{time}}]\\e[0m: local.only
         `);
         const collected = JSON.stringify(collector.collected(), null, 4);
         expect(text(collected)).toMatch(
