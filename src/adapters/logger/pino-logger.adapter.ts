@@ -55,7 +55,7 @@ export class PinoLoggerAdapter implements LoggerPort {
 
             return {
                 error: {
-                    ...error,
+                    ...Object.fromEntries(Object.entries(error)),
                     message: error.message,
                     stack: error.stack,
                 },

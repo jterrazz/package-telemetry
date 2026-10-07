@@ -71,7 +71,7 @@ export class OtelMetricsAdapter<
 
     observableGauge<TName extends keyof TMetrics & string>(
         name: TName,
-        callback: (observe: MetricsObserve<TMetrics[TName]>) => void,
+        sample: (observe: MetricsObserve<TMetrics[TName]>) => void,
     ): void {
         const qualifiedName = this.qualify(name);
         if (this.observableGauges.has(qualifiedName)) {
@@ -81,7 +81,7 @@ export class OtelMetricsAdapter<
 
         const gauge = this.meter.createObservableGauge(qualifiedName);
         gauge.addCallback((result) => {
-            callback((value, attributes) => {
+            sample((value, attributes) => {
                 result.observe(value, sanitizeAttributes(attributes));
             });
         });

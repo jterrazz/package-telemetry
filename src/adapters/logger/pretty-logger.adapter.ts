@@ -13,18 +13,78 @@ const colors = {
     boolean: '\u001B[35m',
 };
 
+const RANKS: Record<LoggerLevel, number> = {
+    debug: 10,
+    info: 20,
+    warn: 30,
+    error: 40,
+    silent: Infinity,
+};
+
+const BARE_STRING_LENGTH = 20;
+
+const INLINE_ITEMS = 3;
+
+const INLINE_KEYS = 2;
+
+const painted = (color: string, text: string): string => `${color}${text}${colors.reset}`;
+
+function formatTimestamp(): string {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+function formatObject(value: object): string {
+    if (value instanceof Error) {
+        return painted(colors.error, value.message);
+    }
+    if (Array.isArray(value)) {
+        return value.length <= INLINE_ITEMS
+            ? `[${value.map((item: unknown) => formatValue(item)).join(', ')}]`
+            : painted(colors.dim, `[${value.length} items]`);
+    }
+    const entries = Object.entries(value);
+    return entries.length <= INLINE_KEYS
+        ? `{${entries.map(([key, item]) => `${key}:${formatValue(item)}`).join(' ')}}`
+        : painted(colors.dim, `{${entries.length} keys}`);
+}
+
+function formatValue(value: unknown): string {
+    if (typeof value === 'string') {
+        return value.length <= BARE_STRING_LENGTH && !/\s/u.test(value)
+            ? painted(colors.string, value)
+            : painted(colors.string, `"${value}"`);
+    }
+    if (typeof value === 'number') {
+        return painted(colors.number, value.toString());
+    }
+    if (typeof value === 'boolean') {
+        return painted(colors.boolean, value.toString());
+    }
+    if (typeof value === 'object') {
+        return value === null ? painted(colors.dim, 'null') : formatObject(value);
+    }
+    if (typeof value === 'bigint' || typeof value === 'function' || typeof value === 'symbol') {
+        return painted(colors.dim, value.toString());
+    }
+
+    return painted(colors.dim, 'undefined');
+}
+
+function formatProps(meta: Record<string, unknown>): string {
+    return Object.entries(meta)
+        .filter(([, value]) => value !== undefined)
+        .map(([key, value]) => `${painted(colors.key, key)}=${formatValue(value)}`)
+        .join(' ');
+}
+
 /** Colored lines for local development: `INFO  [12:34:56]: server.started  port=3000`. */
 export class PrettyLoggerAdapter implements LoggerPort {
     private readonly bindings: Record<string, unknown>;
-    private readonly minLevel: number;
-
-    private static readonly levels: Record<LoggerLevel, number> = {
-        debug: 10,
-        info: 20,
-        warn: 30,
-        error: 40,
-        silent: Infinity,
-    };
+    private readonly level: LoggerLevel;
 
     constructor(
         options: {
@@ -33,13 +93,13 @@ export class PrettyLoggerAdapter implements LoggerPort {
         } = {},
     ) {
         this.bindings = options.bindings ?? {};
-        this.minLevel = PrettyLoggerAdapter.levels[options.level ?? 'info'];
+        this.level = options.level ?? 'info';
     }
 
     child(bindings: Record<string, unknown>): LoggerPort {
         return new PrettyLoggerAdapter({
             bindings: { ...this.bindings, ...bindings },
-            level: this.getLevelName(),
+            level: this.level,
         });
     }
 
@@ -59,118 +119,24 @@ export class PrettyLoggerAdapter implements LoggerPort {
         this.log('warn', message, meta);
     }
 
-    private formatLevel(level: Exclude<LoggerLevel, 'silent'>): string {
-        const color = colors[level];
-        const label = level.toUpperCase().padEnd(5);
-        return `${color}${label}${colors.reset}`;
-    }
-
-    private formatProps(meta?: Record<string, unknown>): string {
-        if (!meta || Object.keys(meta).length === 0) {
-            return '';
-        }
-
-        const parts: string[] = [];
-
-        for (const [key, value] of Object.entries(meta)) {
-            if (value === undefined) {
-                continue;
-            }
-
-            const formattedValue = this.formatValue(value);
-            parts.push(`${colors.key}${key}${colors.reset}=${formattedValue}`);
-        }
-
-        return parts.join(' ');
-    }
-
-    private formatTimestamp(): string {
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = now.getMinutes().toString().padStart(2, '0');
-        const seconds = now.getSeconds().toString().padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
-    }
-
-    private formatValue(value: unknown): string {
-        if (value === null) {
-            return `${colors.dim}null${colors.reset}`;
-        }
-
-        if (typeof value === 'string') {
-            if (value.length <= 20 && !/\s/u.test(value)) {
-                return `${colors.string}${value}${colors.reset}`;
-            }
-            return `${colors.string}"${value}"${colors.reset}`;
-        }
-
-        if (typeof value === 'number') {
-            return `${colors.number}${value}${colors.reset}`;
-        }
-
-        if (typeof value === 'boolean') {
-            return `${colors.boolean}${value}${colors.reset}`;
-        }
-
-        if (value instanceof Error) {
-            return `${colors.error}${value.message}${colors.reset}`;
-        }
-
-        if (Array.isArray(value)) {
-            if (value.length <= 3) {
-                const items = value.map((item) => this.formatValue(item)).join(', ');
-                return `[${items}]`;
-            }
-            return `${colors.dim}[${value.length} items]${colors.reset}`;
-        }
-
-        if (typeof value === 'object') {
-            const keys = Object.keys(value);
-            if (keys.length <= 2) {
-                const items = keys
-                    .map(
-                        (key) =>
-                            `${key}:${this.formatValue((value as Record<string, unknown>)[key])}`,
-                    )
-                    .join(' ');
-                return `{${items}}`;
-            }
-            return `${colors.dim}{${keys.length} keys}${colors.reset}`;
-        }
-
-        return `${colors.dim}${String(value)}${colors.reset}`;
-    }
-
-    private getLevelName(): LoggerLevel {
-        for (const [name, num] of Object.entries(PrettyLoggerAdapter.levels)) {
-            if (num === this.minLevel) {
-                return name as LoggerLevel;
-            }
-        }
-        return 'info';
-    }
-
     private log(
         level: Exclude<LoggerLevel, 'silent'>,
         message: string,
         meta?: Record<string, unknown>,
     ): void {
-        if (PrettyLoggerAdapter.levels[level] < this.minLevel) {
+        if (RANKS[level] < RANKS[this.level]) {
             return;
         }
 
-        const timestamp = this.formatTimestamp();
-        const levelStr = this.formatLevel(level);
-        const propsStr = this.formatProps({ ...this.bindings, ...meta });
-
-        const output = propsStr
-            ? `${levelStr} ${colors.dim}[${timestamp}]${colors.reset}: ${message}  ${propsStr}`
-            : `${levelStr} ${colors.dim}[${timestamp}]${colors.reset}: ${message}`;
+        const label = painted(colors[level], level.toUpperCase().padEnd(5));
+        const props = formatProps({ ...this.bindings, ...meta });
+        const head = `${label} ${painted(colors.dim, `[${formatTimestamp()}]`)}: ${message}`;
+        const line = props === '' ? `${head}\n` : `${head}  ${props}\n`;
 
         if (level === 'error') {
-            console.error(output);
+            process.stderr.write(line);
         } else {
-            console.log(output);
+            process.stdout.write(line);
         }
     }
 }

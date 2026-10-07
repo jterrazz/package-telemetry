@@ -38,10 +38,10 @@ export type MetricsPort<TMetrics extends TelemetryMetrics = TelemetryMetrics> = 
         options?: MetricsRecordOptions<TMetrics[TName]>,
     ) => void;
 
-    /** Samples a gauge once per export interval: `callback` may observe several values, and a second registration of a name is ignored. */
+    /** Samples a gauge once per export interval: `sample` may observe several values, and a second registration of a name is ignored. */
     observableGauge: <TName extends keyof TMetrics & string>(
         name: TName,
-        callback: (observe: MetricsObserve<TMetrics[TName]>) => void,
+        sample: (observe: MetricsObserve<TMetrics[TName]>) => void,
     ) => void;
 };
 
