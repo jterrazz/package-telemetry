@@ -1,5 +1,5 @@
 import { metrics } from '@opentelemetry/api';
-import type { Meter } from '@opentelemetry/api';
+import type { Counter, Gauge, Histogram, Meter } from '@opentelemetry/api';
 
 import type {
     MetricsCounterOptions,
@@ -9,11 +9,14 @@ import type {
     TelemetryMetrics,
 } from '../../ports/metrics.port.js';
 
-// outside: a meter hands back the one instrument it holds for a name however often it is asked, and drops an attribute whose value is undefined.
+// outside: a meter shares one storage per name, but every create call validates the name, resolves the views and builds a new instrument (sdk-metrics 2.x) — so each instrument is made once per name and kept; it drops an attribute whose value is undefined.
 /** Records through the global OpenTelemetry MeterProvider, a no-op until `@jterrazz/telemetry/register` registers one; `namespace` prefixes every name. */
 export class OtelMetricsAdapter<
     TMetrics extends TelemetryMetrics = TelemetryMetrics,
 > implements MetricsPort<TMetrics> {
+    private readonly counters = new Map<string, Counter>();
+    private readonly gauges = new Map<string, Gauge>();
+    private readonly histograms = new Map<string, Histogram>();
     private readonly observableGauges = new Set<string>();
     private readonly meter: Meter;
     private readonly namespace: string | undefined;
@@ -29,7 +32,15 @@ export class OtelMetricsAdapter<
         name: TName,
         options?: MetricsCounterOptions<TMetrics[TName]>,
     ): void {
-        this.meter.createCounter(this.qualify(name)).add(options?.value ?? 1, options?.attributes);
+        const qualifiedName = this.qualify(name);
+        let counter = this.counters.get(qualifiedName);
+        // Stryker disable ConditionalExpression,CallExpression: a fresh instrument of a name records into the storage the kept one does; only the cost differs
+        if (counter === undefined) {
+            counter = this.meter.createCounter(qualifiedName);
+            this.counters.set(qualifiedName, counter);
+        }
+        // Stryker restore ConditionalExpression,CallExpression
+        counter.add(options?.value ?? 1, options?.attributes);
     }
 
     gauge<TName extends keyof TMetrics & string>(
@@ -37,7 +48,15 @@ export class OtelMetricsAdapter<
         value: number,
         options?: MetricsRecordOptions<TMetrics[TName]>,
     ): void {
-        this.meter.createGauge(this.qualify(name)).record(value, options?.attributes);
+        const qualifiedName = this.qualify(name);
+        let gauge = this.gauges.get(qualifiedName);
+        // Stryker disable ConditionalExpression,CallExpression: a fresh instrument of a name records into the storage the kept one does; only the cost differs
+        if (gauge === undefined) {
+            gauge = this.meter.createGauge(qualifiedName);
+            this.gauges.set(qualifiedName, gauge);
+        }
+        // Stryker restore ConditionalExpression,CallExpression
+        gauge.record(value, options?.attributes);
     }
 
     observableGauge<TName extends keyof TMetrics & string>(
@@ -63,7 +82,15 @@ export class OtelMetricsAdapter<
         value: number,
         options?: MetricsRecordOptions<TMetrics[TName]>,
     ): void {
-        this.meter.createHistogram(this.qualify(name)).record(value, options?.attributes);
+        const qualifiedName = this.qualify(name);
+        let histogram = this.histograms.get(qualifiedName);
+        // Stryker disable ConditionalExpression,CallExpression: a fresh instrument of a name records into the storage the kept one does; only the cost differs
+        if (histogram === undefined) {
+            histogram = this.meter.createHistogram(qualifiedName);
+            this.histograms.set(qualifiedName, histogram);
+        }
+        // Stryker restore ConditionalExpression,CallExpression
+        histogram.record(value, options?.attributes);
     }
 
     private qualify(name: string): string {
