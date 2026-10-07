@@ -34,7 +34,7 @@ returns `this` rather than a fixed value, which is worth one test.
 
 `OtelLoggerAdapter`, `OtelTracerAdapter` and `OtelMetricsAdapter` call only
 `@opentelemetry/api`, which resolves to a safe no-op provider until
-`registerTelemetry()` runs ([Architecture](01-architecture.md)). No suite here
+`registerTelemetry()` runs ([Architecture](../concepts/architecture.md)). No suite here
 starts the SDK, so no exporter, no collector and no network stub appears in
 any of them, and each of the three keeps one test on the unregistered path —
 the one production runs until `registerTelemetry()` is called.
@@ -57,5 +57,5 @@ that passes `npm test` but not `npm run lint` is not finished.
 
 ## Related
 
-- [Developing](02-developing.md) — the commands, and where a new file goes.
-- [Architecture](01-architecture.md) — the no-op-until-registered design this suite relies on.
+- [Developing](develop.md) — the commands, and where a new file goes.
+- [Architecture](../concepts/architecture.md) — the no-op-until-registered design this suite relies on.

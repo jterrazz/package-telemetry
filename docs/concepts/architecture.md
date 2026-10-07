@@ -75,5 +75,5 @@ attribute shape is a compile error at the call site.
 
 ## Related
 
-- [Developing](02-developing.md) — the toolchain this package builds and lints with.
-- [Adapters](05-adapters.md) — the concrete adapters behind each port, and the environment variables that select them.
+- [Developing](../guides/develop.md) — the toolchain this package builds and lints with.
+- [Adapters](../reference/adapters.md) — the concrete adapters behind each port, and the environment variables that select them.

@@ -15,7 +15,7 @@ path; every adapter is also exported for custom wiring.
 (`src/factories/create-logger.ts`). `createTracer()` and `createMetrics()`
 always return the OTel-backed adapter — the no-op behaviour comes from the
 API layer itself, not from a factory branch
-([Architecture](01-architecture.md)).
+([Architecture](../concepts/architecture.md)).
 
 ## Naming conventions
 
@@ -61,5 +61,5 @@ import:
 
 ## Related
 
-- [Architecture](01-architecture.md) — the ports these adapters implement, and why the OTel ones need no "is telemetry on" branch.
-- [Developing](02-developing.md) — where a new adapter goes.
+- [Architecture](../concepts/architecture.md) — the ports these adapters implement, and why the OTel ones need no "is telemetry on" branch.
+- [Developing](../guides/develop.md) — where a new adapter goes.

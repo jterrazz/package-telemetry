@@ -12,9 +12,11 @@ measure. Replaces `@jterrazz/logger` and `@jterrazz/monitor` (both deprecated).
 
 1. `npm install @jterrazz/telemetry`
 2. Start the app with the SDK loaded first:
+
     ```bash
     node --import @jterrazz/telemetry/register dist/index.js
     ```
+
 3. Nothing else. Config comes from `OTEL_*` env vars, injected by the K8s app
    chart (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`,
    `OTEL_RESOURCE_ATTRIBUTES`). No endpoint = silent no-op (stdout logs only).

@@ -32,5 +32,5 @@ the tag is what the registry answers to.
 
 ## Related
 
-- [Testing](03-testing.md) — what `validate.yaml` runs.
-- [Developing](02-developing.md) — the gates a merge must pass.
+- [Testing](test.md) — what `validate.yaml` runs.
+- [Developing](develop.md) — the gates a merge must pass.

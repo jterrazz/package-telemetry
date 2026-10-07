@@ -97,5 +97,5 @@ so nothing catches a stale one.
 
 ## Related
 
-- [Architecture](01-architecture.md) — the layers these files implement.
-- [Testing](03-testing.md) — how a change to one of them is proven.
+- [Architecture](../concepts/architecture.md) — the layers these files implement.
+- [Testing](test.md) — how a change to one of them is proven.

@@ -10,13 +10,13 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Decisions
 this package alone took are in `docs/decisions/`. Do not duplicate it — link
 to it.
 
-| Working on…                                                           | Read                      |
-| --------------------------------------------------------------------- | ------------------------- |
-| the layers, the OTel bootstrap, the typed metric catalogue            | `docs/01-architecture.md` |
-| setup, the toolchain, where a new file goes                           | `docs/02-developing.md`   |
-| the suites, and what the no-op design buys for them                   | `docs/03-testing.md`      |
-| the release, and who is allowed to cut one                            | `docs/04-operating.md`    |
-| the concrete adapters, the env vars, the `@jterrazz/logger` migration | `docs/05-adapters.md`     |
+| Working on…                                                           | Read                            |
+| --------------------------------------------------------------------- | ------------------------------- |
+| the layers, the OTel bootstrap, the typed metric catalogue            | `docs/concepts/architecture.md` |
+| setup, the toolchain, where a new file goes                           | `docs/guides/develop.md`        |
+| the suites, and what the no-op design buys for them                   | `docs/guides/test.md`           |
+| the release, and who is allowed to cut one                            | `docs/guides/release.md`        |
+| the concrete adapters, the env vars, the `@jterrazz/logger` migration | `docs/reference/adapters.md`    |
 
 The first four chapters are the spine every repository of the ecosystem
 carries — architecture, developing, testing, operating.
@@ -41,7 +41,7 @@ npm install
 A new or changed export reaches `README.md`, the relevant `docs/` chapter
 and the `skills/jterrazz-telemetry/` skill in the same change — none of the
 three is generated, so nothing else catches a stale one
-(`docs/02-developing.md`).
+(`docs/guides/develop.md`).
 
 `CLAUDE.md` at the root is a symlink to this file: one brief, two names, no
 second copy.
