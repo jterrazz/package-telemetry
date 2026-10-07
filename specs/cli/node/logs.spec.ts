@@ -41,4 +41,22 @@ describe('logs', () => {
             \\e[31mERROR\\e[0m \\e[2m[{{time}}]\\e[0m: request.failed  \\e[90mrequestId\\e[0m=\\e[36mr-42\\e[0m \\e[90merror\\e[0m=\\e[31mboom\\e[0m
         `);
     });
+
+    test('a level read from configuration is checked against the levels the logger knows', async () => {
+        // Given - a consumer validating log levels with the published schema
+        const result = await cli
+            .fixture(directory('./__fixtures__/consumer/'))
+            .prepare(installPacked)
+            .exec('levels.mjs');
+
+        // Then - the five levels are accepted, and a name outside them, or in another case, is refused
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout).toMatch(`
+            levels: debug, info, warn, error, silent
+            debug: accepted
+            silent: accepted
+            verbose: refused
+            INFO: refused
+        `);
+    });
 });

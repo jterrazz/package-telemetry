@@ -11,13 +11,13 @@ make mutation   # the zero-survivor verdict over the change
 
 `specs/cli/` holds one runner, `cli.specification.ts`, which runs `node` with a production environment, a service name and none of the developer's `OTEL_*` variables. Its specs sit in `specs/cli/node/`, and each lays the consumer project of `__fixtures__/consumer/` in a fresh working directory, then installs the packed package beside the packages its `dependencies` name (`__setup__/packed.ts`) — never the checkout's whole install, so a file `files` leaves out or an import the manifest does not declare fails here as it would for a consumer.
 
-| Spec                   | Proves                                                                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `subpaths.spec.ts`     | the ESM and CommonJS builds name the same API; the register entry loads, and starts once however often it is called           |
-| `declarations.spec.ts` | a consumer typed by a metric catalogue compiles against the shipped `.d.ts`, and an undeclared metric or attribute is refused |
-| `logs.spec.ts`         | JSON lines in production, colored lines outside it, every value written by its type, errors on stderr                         |
-| `register.spec.ts`     | export off with no endpoint and under the kill switch; with a collector, every signal arriving as a dashboard reads it        |
-| `noop.spec.ts`         | the null objects record nothing, and a span still answers its function                                                        |
+| Spec                   | Proves                                                                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `subpaths.spec.ts`     | the ESM and CommonJS builds name the same API; the register entry loads, and starts once however often it is called                                                      |
+| `declarations.spec.ts` | a consumer typed by a metric catalogue compiles against the shipped `.d.ts`, and an undeclared metric or attribute is refused                                            |
+| `logs.spec.ts`         | JSON lines in production, colored lines outside it, every value written by its type, errors on stderr; `LoggerLevelSchema` accepts the five levels and refuses any other |
+| `register.spec.ts`     | export off with no endpoint and under the kill switch; with a collector, every signal arriving as a dashboard reads it                                                   |
+| `noop.spec.ts`         | the null objects record nothing, and a span still answers its function                                                                                                   |
 
 ## The collector
 
