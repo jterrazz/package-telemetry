@@ -37,6 +37,7 @@ code, never the adapters.
 ## Ports
 
 ```typescript
+// LoggerLevelSchema (zod): 'debug' | 'info' | 'warn' | 'error' | 'silent' — parse a configured level with it
 interface LoggerPort {
     child: (bindings: Record<string, unknown>) => LoggerPort;
     debug/info/warn/error: (message: string, meta?: Record<string, unknown>) => void;
@@ -52,6 +53,8 @@ interface MetricsPort<TMetrics> {
     counter: (name, options?: { attributes?; value? }) => void;
     histogram: (name, value: number, options?: { attributes? }) => void;
     gauge: (name, value: number, options?: { attributes? }) => void;
+    // sampled once per export interval; a second registration of a name is ignored
+    observableGauge: (name, sample: (observe: (value: number, attributes?) => void) => void) => void;
 }
 ```
 

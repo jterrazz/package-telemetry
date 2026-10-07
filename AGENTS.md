@@ -23,15 +23,10 @@ The manual is cut by its reader's need — `guides/`, `concepts/`, `reference/` 
 the shape every repository of the ecosystem keeps, and `typescript check`
 refuses a tree that breaks it (the Docs (layout) pass).
 
-## Setup
+## Setup and commands
 
-```bash
-npm install
-```
-
-## Commands
-
-The gestures — `make build`, `make lint`, `make fix`, `make test`,
+The gestures — `make install` (`npm ci`, never a plain `npm install`, which can
+rewrite the lockfile), `make build`, `make lint`, `make fix`, `make test`,
 `make mutation`, `make check` — and what each runs are
 [Develop § The gestures](docs/guides/develop.md#the-gestures)'s.
 
