@@ -1,22 +1,8 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import type { Attributes, Tracer } from '@opentelemetry/api';
+import type { Tracer } from '@opentelemetry/api';
 
 import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
 import type { TracerPort, TracerSpanOptions } from '../../ports/tracer.port.js';
-
-function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
-    if (!attributes) {
-        return {};
-    }
-
-    const result: Attributes = {};
-    for (const [key, value] of Object.entries(attributes)) {
-        if (value !== undefined) {
-            result[key] = value;
-        }
-    }
-    return result;
-}
 
 /** Manual spans beside auto-instrumentation, through the global OpenTelemetry TracerProvider — a no-op until `@jterrazz/telemetry/register` registers one. */
 export class OtelTracerAdapter implements TracerPort {
@@ -35,7 +21,7 @@ export class OtelTracerAdapter implements TracerPort {
         if (!currentSpan) {
             return;
         }
-        currentSpan.addEvent(name, sanitizeAttributes(attributes));
+        currentSpan.addEvent(name, attributes);
     }
 
     setAttribute(key: string, value: boolean | number | string): void {
@@ -54,7 +40,7 @@ export class OtelTracerAdapter implements TracerPort {
 
         return await this.tracer.startActiveSpan(
             spanName,
-            { attributes: sanitizeAttributes(options?.attributes) },
+            { attributes: options?.attributes ?? {} },
             async (span) => {
                 try {
                     const result = await fn();

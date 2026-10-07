@@ -1,5 +1,5 @@
 import { metrics } from '@opentelemetry/api';
-import type { Attributes, Counter, Gauge, Histogram, Meter } from '@opentelemetry/api';
+import type { Meter } from '@opentelemetry/api';
 
 import type {
     MetricsCounterOptions,
@@ -8,29 +8,12 @@ import type {
     MetricsRecordOptions,
     TelemetryMetrics,
 } from '../../ports/metrics.port.js';
-import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
 
-function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
-    if (!attributes) {
-        return {};
-    }
-
-    const result: Attributes = {};
-    for (const [key, value] of Object.entries(attributes)) {
-        if (value !== undefined) {
-            result[key] = value;
-        }
-    }
-    return result;
-}
-
+// outside: a meter hands back the one instrument it holds for a name however often it is asked, and drops an attribute whose value is undefined.
 /** Records through the global OpenTelemetry MeterProvider, a no-op until `@jterrazz/telemetry/register` registers one; `namespace` prefixes every name. */
 export class OtelMetricsAdapter<
     TMetrics extends TelemetryMetrics = TelemetryMetrics,
 > implements MetricsPort<TMetrics> {
-    private readonly counters = new Map<string, Counter>();
-    private readonly gauges = new Map<string, Gauge>();
-    private readonly histograms = new Map<string, Histogram>();
     private readonly observableGauges = new Set<string>();
     private readonly meter: Meter;
     private readonly namespace: string | undefined;
@@ -46,13 +29,7 @@ export class OtelMetricsAdapter<
         name: TName,
         options?: MetricsCounterOptions<TMetrics[TName]>,
     ): void {
-        const qualifiedName = this.qualify(name);
-        let counter = this.counters.get(qualifiedName);
-        if (!counter) {
-            counter = this.meter.createCounter(qualifiedName);
-            this.counters.set(qualifiedName, counter);
-        }
-        counter.add(options?.value ?? 1, sanitizeAttributes(options?.attributes));
+        this.meter.createCounter(this.qualify(name)).add(options?.value ?? 1, options?.attributes);
     }
 
     gauge<TName extends keyof TMetrics & string>(
@@ -60,13 +37,7 @@ export class OtelMetricsAdapter<
         value: number,
         options?: MetricsRecordOptions<TMetrics[TName]>,
     ): void {
-        const qualifiedName = this.qualify(name);
-        let gauge = this.gauges.get(qualifiedName);
-        if (!gauge) {
-            gauge = this.meter.createGauge(qualifiedName);
-            this.gauges.set(qualifiedName, gauge);
-        }
-        gauge.record(value, sanitizeAttributes(options?.attributes));
+        this.meter.createGauge(this.qualify(name)).record(value, options?.attributes);
     }
 
     observableGauge<TName extends keyof TMetrics & string>(
@@ -82,7 +53,7 @@ export class OtelMetricsAdapter<
         const gauge = this.meter.createObservableGauge(qualifiedName);
         gauge.addCallback((result) => {
             sample((value, attributes) => {
-                result.observe(value, sanitizeAttributes(attributes));
+                result.observe(value, attributes);
             });
         });
     }
@@ -92,13 +63,7 @@ export class OtelMetricsAdapter<
         value: number,
         options?: MetricsRecordOptions<TMetrics[TName]>,
     ): void {
-        const qualifiedName = this.qualify(name);
-        let histogram = this.histograms.get(qualifiedName);
-        if (!histogram) {
-            histogram = this.meter.createHistogram(qualifiedName);
-            this.histograms.set(qualifiedName, histogram);
-        }
-        histogram.record(value, sanitizeAttributes(options?.attributes));
+        this.meter.createHistogram(this.qualify(name)).record(value, options?.attributes);
     }
 
     private qualify(name: string): string {

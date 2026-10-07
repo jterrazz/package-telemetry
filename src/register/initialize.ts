@@ -15,42 +15,21 @@ const report = (...parts: unknown[]): void => {
     process.stdout.write(`${format('[Telemetry]', ...parts)}\n`);
 };
 
-// outside: OTLP headers are written `Key1=Value1,Key2=Value2`, each value URL-encoded.
-function parseHeaders(headerString?: string): Record<string, string> {
-    const headers: Record<string, string> = {};
-
-    if (headerString === undefined || headerString === '') {
-        return headers;
-    }
-
-    for (const pair of headerString.split(',')) {
-        const eqIndex = pair.indexOf('=');
-        if (eqIndex > 0) {
-            headers[pair.slice(0, eqIndex).trim()] = decodeURIComponent(
-                pair.slice(eqIndex + 1).trim(),
-            );
-        }
-    }
-    return headers;
-}
-
 function deploymentEnvironmentOf(resourceAttributes: string): string {
-    const environmentMatch = /deployment\.environment=(?<environment>[^,]+)/u.exec(
-        resourceAttributes,
-    );
+    const { environment } =
+        /deployment\.environment=(?<environment>[^,]+)/u.exec(resourceAttributes)?.groups ?? {};
 
-    return environmentMatch?.groups?.environment ?? process.env.NODE_ENV ?? 'development';
+    return environment ?? process.env.NODE_ENV ?? 'development';
 }
 
-function registerLogs(endpoint: string, resource: Resource): void {
-    const exporter = new OTLPLogExporter({
-        headers: parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
-        url: `${endpoint}/v1/logs`,
-    });
+// outside: an OTLP exporter reads its endpoint and its headers from OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_EXPORTER_OTLP_HEADERS itself, appending the signal's path.
+function registerLogs(resource: Resource): void {
+    const exporter = new OTLPLogExporter();
 
     logs.setGlobalLoggerProvider(
         new LoggerProvider({
             processors: [
+                // Stryker disable next-line ObjectLiteral: the batch's size and delay decide when a record leaves, never what leaves
                 new BatchLogRecordProcessor(exporter, {
                     maxExportBatchSize: 100,
                     scheduledDelayMillis: 1000,
@@ -62,11 +41,8 @@ function registerLogs(endpoint: string, resource: Resource): void {
 }
 
 // hazard: without a registered MeterProvider every getMeter() resolves to the global no-op, and every instrument emits nothing.
-function registerMetrics(endpoint: string, resource: Resource): void {
-    const exporter = new OTLPMetricExporter({
-        headers: parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
-        url: `${endpoint}/v1/metrics`,
-    });
+function registerMetrics(resource: Resource): void {
+    const exporter = new OTLPMetricExporter();
 
     metrics.setGlobalMeterProvider(
         new MeterProvider({
@@ -99,19 +75,22 @@ export async function registerTelemetry(): Promise<void> {
     const serviceName = process.env.OTEL_SERVICE_NAME ?? 'unknown-service';
 
     // hazard: auto-instrumentation reads these as it is imported; logs and metrics go through the providers registered here instead, since its own SDK would leave getMeter() on the global no-op.
+    // Stryker disable AssignmentOperator,StringLiteral: the SDK's own logs and metrics providers would register after these and lose the global, and otlp is its default trace exporter: the collector receives the same signals either way
     process.env.OTEL_TRACES_EXPORTER ??= 'otlp';
     process.env.OTEL_METRICS_EXPORTER ??= 'none';
     process.env.OTEL_LOGS_EXPORTER ??= 'none';
+    // Stryker restore AssignmentOperator,StringLiteral
     process.env.OTEL_NODE_RESOURCE_DETECTORS ??= 'env,host,os';
 
+    // Stryker disable next-line StringLiteral: an absent variable and a text naming no deployment fall back alike
     const environment = deploymentEnvironmentOf(process.env.OTEL_RESOURCE_ATTRIBUTES ?? '');
     const resource = resourceFromAttributes({
         [ATTR_SERVICE_NAME]: serviceName,
         'deployment.environment': environment,
     });
 
-    registerLogs(endpoint, resource);
-    registerMetrics(endpoint, resource);
+    registerLogs(resource);
+    registerMetrics(resource);
 
     await import('@opentelemetry/auto-instrumentations-node/register');
 

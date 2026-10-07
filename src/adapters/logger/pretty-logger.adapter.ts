@@ -29,13 +29,7 @@ const INLINE_KEYS = 2;
 
 const painted = (color: string, text: string): string => `${color}${text}${colors.reset}`;
 
-function formatTimestamp(): string {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
-}
+const formatTimestamp = (): string => new Date().toTimeString().slice(0, 8);
 
 function formatObject(value: object): string {
     if (value instanceof Error) {

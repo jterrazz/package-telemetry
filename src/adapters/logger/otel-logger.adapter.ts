@@ -13,7 +13,7 @@ const SEVERITIES: Record<Level, SeverityNumber> = {
     warn: SeverityNumber.WARN,
 };
 
-// outside: an OpenTelemetry attribute holds a primitive, so an Error is split into its message and its stack, and any other object is serialized.
+// outside: an OpenTelemetry attribute holds a primitive, so an Error is split into its message and its stack, any other object is serialized, and what JSON cannot hold is left out.
 function flattenMeta(meta: Record<string, unknown>): Record<string, boolean | number | string> {
     const result: Record<string, boolean | number | string> = {};
     for (const [key, value] of Object.entries(meta)) {
@@ -22,7 +22,7 @@ function flattenMeta(meta: Record<string, unknown>): Record<string, boolean | nu
         } else if (value instanceof Error) {
             result[`${key}.message`] = value.message;
             result[`${key}.stack`] = value.stack ?? '';
-        } else if (value !== null && value !== undefined) {
+        } else if (typeof value === 'object' && value !== null) {
             result[key] = JSON.stringify(value);
         }
     }
