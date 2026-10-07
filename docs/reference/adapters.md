@@ -33,33 +33,20 @@ infrastructure rather than passed by the application.
 `registerTelemetry()` (`src/register/initialize.ts`) reads these, and
 nothing else:
 
-| Variable                      | Effect                                                                  |
-| ----------------------------- | ----------------------------------------------------------------------- |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint; absent = every export disabled                      |
-| `OTEL_SERVICE_NAME`           | Service identity on every signal (default `unknown-service`)            |
-| `OTEL_RESOURCE_ATTRIBUTES`    | Extra resource attributes; `deployment.environment` is parsed out of it |
-| `OTEL_EXPORTER_OTLP_HEADERS`  | `Key=Value,Key2=Value2` auth headers, sent with logs and metrics        |
-| `OTEL_SDK_DISABLED=true`      | Hard kill switch — skips registration entirely                          |
+| Variable                      | Effect                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint; absent = every export disabled                              |
+| `OTEL_SERVICE_NAME`           | Service identity on every signal (default `unknown-service`)                    |
+| `OTEL_RESOURCE_ATTRIBUTES`    | Extra resource attributes; `deployment.environment` is parsed out of it         |
+| `OTEL_EXPORTER_OTLP_HEADERS`  | `Key=Value,Key2=Value2` headers, each value URL-encoded, sent with every signal |
+| `OTEL_SDK_DISABLED=true`      | Hard kill switch — skips registration entirely                                  |
 
 Signals land in Grafana: logs and traces flow to Loki and Tempo through the
 cluster's otel-collector; metrics are remote-written to Prometheus — there
 is no `/metrics` endpoint to scrape.
 
-## Migrating from `@jterrazz/logger`
-
-`LoggerPort`, `LoggerLevel`, `PinoLoggerAdapter` and `NoopLoggerAdapter` are
-source-compatible with the absorbed `@jterrazz/logger` package — change the
-import:
-
-```diff
--import { type LoggerPort, PinoLoggerAdapter } from '@jterrazz/logger';
-+import { type LoggerPort, PinoLoggerAdapter } from '@jterrazz/telemetry';
-```
-
-`PinoLoggerAdapter` no longer takes `prettyPrint` — use `createLogger()` or
-`PrettyLoggerAdapter` for development output.
-
 ## Related
 
 - [Architecture](../concepts/architecture.md) — the ports these adapters implement, and why the OTel ones need no "is telemetry on" branch.
-- [Developing](../guides/develop.md) — where a new adapter goes.
+- [Develop](../guides/develop.md) — where a new adapter goes.
+- [Migrate from @jterrazz/logger](../guides/migrate-from-logger.md) — the logger names this package kept.

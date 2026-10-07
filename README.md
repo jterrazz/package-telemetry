@@ -52,15 +52,14 @@ OTLP to the collector, which remote-writes them to Prometheus — no
 
 ## Documentation
 
-The full corpus lives in [`docs/`](docs/):
+The manual lives in [`docs/`](docs/README.md):
 
 - [Architecture](docs/concepts/architecture.md) — the layers, the OTel bootstrap, the typed metric catalogue.
-- [Developing](docs/guides/develop.md) — the toolchain, and where a new file goes.
-- [Testing](docs/guides/test.md) — the suites, and what the no-op design buys them.
-- [Operating](docs/guides/release.md) — the release, and who is allowed to cut one.
-- [Adapters](docs/reference/adapters.md) — the concrete adapters, the environment variables, the `@jterrazz/logger` migration.
+- [Adapters](docs/reference/adapters.md) — the concrete adapters, the naming conventions, the environment variables.
+- [Migrate from @jterrazz/logger](docs/guides/migrate-from-logger.md) — the logger names this package kept.
+- [Develop](docs/guides/develop.md), [Test](docs/guides/test.md), [Release](docs/guides/release.md) — changing, proving and publishing the package.
 
-For agents: read the chapters straight from the repo, plus the
+For agents: read the pages straight from the repo, plus the
 [`skills/jterrazz-telemetry`](skills/jterrazz-telemetry/SKILL.md) Claude Code skill.
 
 ## License

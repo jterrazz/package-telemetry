@@ -10,16 +10,18 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Decisions
 this package alone took are in `docs/decisions/`. Do not duplicate it — link
 to it.
 
-| Working on…                                                           | Read                            |
-| --------------------------------------------------------------------- | ------------------------------- |
-| the layers, the OTel bootstrap, the typed metric catalogue            | `docs/concepts/architecture.md` |
-| setup, the toolchain, where a new file goes                           | `docs/guides/develop.md`        |
-| the suites, and what the no-op design buys for them                   | `docs/guides/test.md`           |
-| the release, and who is allowed to cut one                            | `docs/guides/release.md`        |
-| the concrete adapters, the env vars, the `@jterrazz/logger` migration | `docs/reference/adapters.md`    |
+| Working on…                                                      | Read                                 |
+| ---------------------------------------------------------------- | ------------------------------------ |
+| the layers, the exports, the OTel bootstrap, the typed catalogue | `docs/concepts/architecture.md`      |
+| the declaration, the gestures, where a new file goes             | `docs/guides/develop.md`             |
+| the specs, the collector, the mutation verdict                   | `docs/guides/test.md`                |
+| the release, and who is allowed to cut one                       | `docs/guides/release.md`             |
+| the adapters, the naming conventions, the env vars               | `docs/reference/adapters.md`         |
+| a service still on `@jterrazz/logger`                            | `docs/guides/migrate-from-logger.md` |
 
-The first four chapters are the spine every repository of the ecosystem
-carries — architecture, developing, testing, operating.
+The manual is cut by its reader's need — `guides/`, `concepts/`, `reference/` —
+the shape every repository of the ecosystem keeps, and `typescript check`
+refuses a tree that breaks it (the Docs (layout) pass).
 
 ## Setup
 
@@ -29,19 +31,16 @@ npm install
 
 ## Commands
 
-| Task                                     | Command            |
-| ---------------------------------------- | ------------------ |
-| Build                                    | `npm run build`    |
-| Lint + format + type-check + docs layout | `npm run lint`     |
-| Auto-fix lint issues                     | `npm run lint:fix` |
-| Run tests                                | `npm test`         |
+The gestures — `make build`, `make lint`, `make fix`, `make test`,
+`make mutation`, `make check` — and what each runs are
+[Develop § The gestures](docs/guides/develop.md#the-gestures)'s.
 
 ## Standing rule
 
 A new or changed export reaches `README.md`, the relevant `docs/` chapter
 and the `skills/jterrazz-telemetry/` skill in the same change — none of the
 three is generated, so nothing else catches a stale one
-(`docs/guides/develop.md`).
+([Develop § What a change owes](docs/guides/develop.md#what-a-change-owes)).
 
 `CLAUDE.md` at the root is a symlink to this file: one brief, two names, no
 second copy.

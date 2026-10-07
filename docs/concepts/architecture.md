@@ -26,15 +26,17 @@ a process that only needs the ports.
 }
 ```
 
-`./register` is ESM-only (`package.json`): `register/initialize.ts` uses a
-top-level `await import(...)` for the auto-instrumentation package, and
-`--import` itself only loads ESM. `tsdown.config.js` builds it as a second,
-non-cleaning entry alongside the CJS+ESM barrel.
+`./register` is ESM-only (`package.json`): `src/index.register.ts` starts
+the SDK with a top-level `await`, and `--import` itself only loads ESM.
+`typescript build` derives both entries from this map — `.` from
+`src/index.ts`, in CommonJS and ESM because it publishes both targets, and
+`./register` from `src/index.register.ts`, the source the subpath names —
+so the package keeps no build config of its own.
 
 ## The OTel bootstrap is opt-in and idempotent
 
 `registerTelemetry()` (`src/register/initialize.ts`) reads `OTEL_*`
-environment variables and does nothing beyond logging to stdout unless
+environment variables and does nothing beyond one status line on stdout unless
 `OTEL_EXPORTER_OTLP_ENDPOINT` is set and `OTEL_SDK_DISABLED` is not `true`.
 When it does run, it sets a global `LoggerProvider` and `MeterProvider`
 explicitly — relying on the auto-instrumentation SDK alone leaves
@@ -75,5 +77,5 @@ attribute shape is a compile error at the call site.
 
 ## Related
 
-- [Developing](../guides/develop.md) — the toolchain this package builds and lints with.
+- [Develop](../guides/develop.md) — the toolchain this package builds and lints with.
 - [Adapters](../reference/adapters.md) — the concrete adapters behind each port, and the environment variables that select them.

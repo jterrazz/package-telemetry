@@ -1,61 +1,45 @@
-# Testing
+# Test
 
-What proves a change here is a module test beside the module it covers —
-`<file>.test.ts` next to `<file>.ts`, never a `__tests__/` folder (rule I2)
-— collected by the single `unit()` project `vitest.config.ts` declares.
-There is no `specs/` product suite in this repository today.
+What proves a change here is a specification of what a consumer meets: the package installed from the tarball `npm pack` writes, driven from a consumer's project by `node`. There is no module test today.
 
 ```bash
-npm test   # vitest --run
+make test       # builds, then runs every spec
+make mutation   # the zero-survivor verdict over the change
 ```
 
-## What is covered
+## The specs
 
-Nine suites, each beside the code it proves:
+`specs/cli/` holds one runner, `cli.specification.ts`, which runs `node` with a production environment, a service name and none of the developer's `OTEL_*` variables. Its specs sit in `specs/cli/node/`, and each lays the consumer project of `__fixtures__/consumer/` in a fresh working directory, then installs the packed package beside the packages its `dependencies` name (`__setup__/packed.ts`) — never the checkout's whole install, so a file `files` leaves out or an import the manifest does not declare fails here as it would for a consumer.
 
-| Suite                                               | Proves                                                                          |
-| --------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `src/adapters/logger/pino-logger.adapter.test.ts`   | structured JSON output, level, message, meta                                    |
-| `src/adapters/logger/pretty-logger.adapter.test.ts` | the colored development format                                                  |
-| `src/adapters/logger/otel-logger.adapter.test.ts`   | dual-emit to the wrapped logger and to OTLP                                     |
-| `src/adapters/logger/noop-logger.adapter.test.ts`   | every call is a safe no-op                                                      |
-| `src/adapters/tracer/otel-tracer.adapter.test.ts`   | span lifecycle, attributes, error capture                                       |
-| `src/adapters/metrics/otel-metrics.adapter.test.ts` | counter/histogram/gauge/observableGauge recording                               |
-| `src/factories/create-logger.test.ts`               | `createLogger` picks the right adapter from options and `OTEL_*` env vars       |
-| `src/factories/create-tracer.test.ts`               | `createTracer` returns the OTel-backed tracer                                   |
-| `src/factories/create-metrics.test.ts`              | `createMetrics` returns the OTel-backed recorder, and accepts a typed catalogue |
+| Spec                   | Proves                                                                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `subpaths.spec.ts`     | the ESM and CommonJS builds name the same API; the register entry loads, and starts once however often it is called           |
+| `declarations.spec.ts` | a consumer typed by a metric catalogue compiles against the shipped `.d.ts`, and an undeclared metric or attribute is refused |
+| `logs.spec.ts`         | JSON lines in production, colored lines outside it, every value written by its type, errors on stderr                         |
+| `register.spec.ts`     | export off with no endpoint and under the kill switch; with a collector, every signal arriving as a dashboard reads it        |
+| `noop.spec.ts`         | the null objects record nothing, and a span still answers its function                                                        |
 
-`NoopTracerAdapter` and `NoopMetricsAdapter` carry no test of their own —
-each is a fixed no-op return, with nothing to prove beyond what the type
-checker already holds. `NoopLoggerAdapter` is the exception: `child()`
-returns `this` rather than a fixed value, which is worth one test.
+## The collector
 
-## What the OTel suites stand on
+`register.spec.ts` and `defaults.spec.ts` start an OTLP/HTTP collector (`__setup__/collector.ts`) on a free local port inside the test, hand its URL to the consumer as `OTEL_EXPORTER_OTLP_ENDPOINT`, and compare what it received, reduced to what a dashboard reads: the log records with their severity and flattened attributes, the namespaced metrics and their points under their meter, the spans with their status and events under their tracer, the headers, the resource, and which resource detectors the traces carry. The run waits for the consumer's `flushed` with `waitFor`, which spawns it asynchronously: a one-shot `exec` blocks the test's event loop, and the collector could not answer. The consumer flushes the providers itself before it prints `flushed`: the register entry sets no exit hook, so a process ending sooner keeps what its batches still hold.
 
-`OtelLoggerAdapter`, `OtelTracerAdapter` and `OtelMetricsAdapter` call only
-`@opentelemetry/api`, which resolves to a safe no-op provider until
-`registerTelemetry()` runs ([Architecture](../concepts/architecture.md)). No suite here
-starts the SDK, so no exporter, no collector and no network stub appears in
-any of them, and each of the three keeps one test on the unregistered path —
-the one production runs until `registerTelemetry()` is called.
+The spec sets two variables that are OpenTelemetry's, not the package's: `OTEL_EXPORTER_OTLP_PROTOCOL=http/json`, since the collector reads JSON and the trace exporter defaults to protobuf, and `OTEL_NODE_ENABLED_INSTRUMENTATIONS=http`, which keeps the runtime metrics out of the payload.
 
-Two of the three need a provider to observe what they did. The logger's suite
-reads the wrapped logger it was handed, but a span and an instrument are only
-reachable through the provider that made them, so
-`otel-tracer.adapter.test.ts` and `otel-metrics.adapter.test.ts` register a
-fake one on the global API — `trace.setGlobalTracerProvider`,
-`metrics.setGlobalMeterProvider`. That global is process-wide state, and the
-registering function gives it back itself: it returns a `Symbol.dispose`, each
-test declares it with `using`, and the provider is disabled where it was
-registered rather than in a hook the reader has to scroll up to find.
+## What earns a test
 
-## The self-lint
+A behaviour a consumer relies on is specified through the packed package. A module test is kept only for a pure algorithm whose edges are cheaper at its own level, or for a failure no consumer's run can provoke honestly; none of the modules here is either, so the nine module tests the package once had were promoted to the specs above or deleted.
 
-`npm run lint` is `typescript check`, which type-checks, lints, format-checks
-and runs the unused-code and docs-layout gates on this repository — a change
-that passes `npm test` but not `npm run lint` is not finished.
+## Mutation
+
+`make mutation` runs `typescript mutation`: Stryker mutates the lines a change touched that no module test runs, rebuilds, and runs every spec against each mutant — the packed tarball carries the mutant, and every `node` a spec spawns reports which mutants it ran. A mutant that a test runs and none detects fails the gate. Measure a whole branch with `npx typescript mutation --since <commit>`, or every line of the sources with `--mutate`, its ranges comma-separated:
+
+```bash
+npx typescript mutation --mutate "$(ls src/adapters/*/*.ts src/factories/*.ts src/register/*.ts src/index.register.ts | sed 's/$/:1-400/' | paste -sd, -)"
+```
+
+Every mutant of every source is detected that way; the few no consumer can tell apart from the code — the log batch's timing, the exporter defaults register sets before auto-instrumentation loads — are declared where they stand, with their reason.
 
 ## Related
 
-- [Developing](develop.md) — the commands, and where a new file goes.
-- [Architecture](../concepts/architecture.md) — the no-op-until-registered design this suite relies on.
+- [Develop](develop.md) — the gestures, and where a new file goes.
+- [Architecture](../concepts/architecture.md) — the no-op-until-registered design the specs rely on.

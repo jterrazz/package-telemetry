@@ -1,15 +1,15 @@
-# Operating
+# Release
 
 This repository ships one thing: the npm package `@jterrazz/telemetry`,
 published to the public registry. There is no service, no image and no
-infrastructure of its own — what "operating" means here is the release, and
-who is allowed to cut one.
+infrastructure of its own — releasing it is the whole of shipping it, and
+this guide is how it is cut and who cuts it.
 
 ## What a merge to `main` does
 
 Nothing that reaches a consumer. `.github/workflows/validate.yaml` runs on
 every push and pull request to `main` and calls the shared `jterrazz-actions`
-validation workflow — install, lint, test. A green `main` is a publishable
+validation workflow — build, lint, test, mutation. A green `main` is a publishable
 tree, not a published one.
 
 ## What publishes
@@ -32,5 +32,5 @@ the tag is what the registry answers to.
 
 ## Related
 
-- [Testing](test.md) — what `validate.yaml` runs.
-- [Developing](develop.md) — the gates a merge must pass.
+- [Test](test.md) — what `validate.yaml` runs.
+- [Develop](develop.md) — the gates a merge must pass.
