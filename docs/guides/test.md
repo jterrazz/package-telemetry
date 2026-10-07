@@ -18,7 +18,7 @@ make mutation   # the zero-survivor verdict over the change
 | `logs.spec.ts`         | JSON lines in production, colored lines outside it, every value written by its type, errors on stderr; a logger built at `warn` drops what lies below, one built `silent` writes nothing; `LoggerLevelSchema` accepts the five levels and refuses any other |
 | `register.spec.ts`     | export off with no endpoint and under the kill switch; with a collector, every signal arriving as a dashboard reads it, and `otlp: false` keeping a logger off it                                                                                           |
 | `defaults.spec.ts`     | with no service or deployment named, which defaults each signal carries — the package's on logs and metrics, OpenTelemetry's on traces                                                                                                                      |
-| `noop.spec.ts`         | the null objects record nothing, and a span still answers its function                                                                                                                                                                                      |
+| `noop.spec.ts`         | the null objects, and the factories' OpenTelemetry adapters before `registerTelemetry()` runs, record nothing and throw nothing; a span still answers its function and rethrows its error                                                                   |
 
 The specs pack `dist/`, never `src/`: `make test` builds first, but `npx vitest`, or one spec run on its own, straight after an edit tests the previous build — run `make build` before it.
 
