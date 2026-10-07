@@ -30,16 +30,41 @@ infrastructure rather than passed by the application.
 
 ## Environment variables
 
-`registerTelemetry()` (`src/register/initialize.ts`) reads these, and
-nothing else:
+`registerTelemetry()` (`src/register/initialize.ts`) reads these itself:
 
-| Variable                      | Effect                                                                          |
-| ----------------------------- | ------------------------------------------------------------------------------- |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint; absent = every export disabled                              |
-| `OTEL_SERVICE_NAME`           | Service identity on every signal (default `unknown-service`)                    |
-| `OTEL_RESOURCE_ATTRIBUTES`    | Extra resource attributes; `deployment.environment` is parsed out of it         |
-| `OTEL_EXPORTER_OTLP_HEADERS`  | `Key=Value,Key2=Value2` headers, each value URL-encoded, sent with every signal |
-| `OTEL_SDK_DISABLED=true`      | Hard kill switch — skips registration entirely                                  |
+| Variable                      | Effect                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `OTEL_SDK_DISABLED=true`      | Hard kill switch — skips registration entirely                                           |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint; absent or empty = every export disabled                              |
+| `OTEL_SERVICE_NAME`           | `service.name` on the logs and metrics resource (default `unknown-service`)              |
+| `OTEL_RESOURCE_ATTRIBUTES`    | `deployment.environment` is parsed out of it for the logs and metrics resource           |
+| `NODE_ENV`                    | The `deployment.environment` fallback when the attributes name none (then `development`) |
+
+OpenTelemetry's exporters and SDK read the rest themselves, among them
+`OTEL_EXPORTER_OTLP_HEADERS` (`Key=Value,Key2=Value2`, each value
+URL-encoded), the per-signal `OTEL_EXPORTER_OTLP_{LOGS,METRICS,TRACES}_ENDPOINT`,
+`_HEADERS` and `_TIMEOUT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, and — for traces —
+`OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` again.
+
+Before it imports auto-instrumentation, `registerTelemetry()` sets four
+defaults, each kept when the environment already sets it:
+
+| Variable                       | Default       | What it does                                                                        |
+| ------------------------------ | ------------- | ----------------------------------------------------------------------------------- |
+| `OTEL_TRACES_EXPORTER`         | `otlp`        | auto-instrumentation exports its spans over OTLP                                    |
+| `OTEL_METRICS_EXPORTER`        | `none`        | its own SDK registers no metrics pipeline: the `MeterProvider` registered here does |
+| `OTEL_LOGS_EXPORTER`           | `none`        | its own SDK registers no logs pipeline: the `LoggerProvider` registered here does   |
+| `OTEL_NODE_RESOURCE_DETECTORS` | `env,host,os` | the trace resource carries the host and OS, never the process's command line        |
+
+The `unknown-service` default applies where the package names things itself:
+the scope of every logger, meter and tracer the factories create, and the
+logs and metrics resource. Traces take their resource from
+auto-instrumentation's SDK, which follows OpenTelemetry's defaults: with no
+`OTEL_SERVICE_NAME` their `service.name` is `unknown_service:<argv0>`
+(`unknown_service:node`), and with no `deployment.environment` in
+`OTEL_RESOURCE_ATTRIBUTES` they carry no deployment — `NODE_ENV` is not read
+for them (`specs/cli/node/defaults.spec.ts`). The app chart sets both
+variables, so a deployed service's signals agree.
 
 Signals land in Grafana: logs and traces flow to Loki and Tempo through the
 cluster's otel-collector; metrics are remote-written to Prometheus — there
