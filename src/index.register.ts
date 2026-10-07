@@ -1,12 +1,4 @@
-/**
- * OpenTelemetry SDK entry point, loaded before the application:
- *
- * `node --import @jterrazz/telemetry/register dist/index.js`
- *
- * Everything is configured from OTEL_* environment variables — on the
- * jterrazz K8s app chart they are injected automatically, so this line is
- * the entire setup.
- */
+// outside: Node loads this entry before the application — `node --import @jterrazz/telemetry/register dist/index.js` — and the OTEL_* variables the app chart injects configure it.
 import { registerTelemetry } from './register/initialize.js';
 
 await registerTelemetry();

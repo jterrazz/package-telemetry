@@ -4,9 +4,7 @@ import type { LoggerPort } from '../../ports/logger.port.js';
 
 type OtelLogger = ReturnType<typeof logs.getLogger>;
 
-/**
- * Flatten meta object for OTEL attributes (must be primitive values)
- */
+// outside: an OpenTelemetry attribute holds a primitive, so an Error is split into its message and its stack, and any other object is serialized.
 function flattenMeta(meta?: Record<string, unknown>): Record<string, boolean | number | string> {
     if (!meta) {
         return {};
@@ -41,10 +39,6 @@ function emitLog(
     });
 }
 
-/**
- * Child logger that shares the OTEL logger with its parent and carries the
- * accumulated bindings as OTEL attributes.
- */
 class OtelChildLoggerAdapter implements LoggerPort {
     private readonly bindings: Record<string, unknown>;
     private readonly innerLogger: LoggerPort;
@@ -101,21 +95,13 @@ class OtelChildLoggerAdapter implements LoggerPort {
     }
 }
 
-/**
- * OpenTelemetry logging adapter that wraps any LoggerPort and dual-emits:
- * - to the wrapped logger (e.g. pino → stdout, so kubectl logs keeps working)
- * - to the global OTEL LoggerProvider (→ OTLP collector → Loki)
- *
- * The LoggerProvider is registered by '@jterrazz/telemetry/register'. Until
- * then the OTEL side is a no-op, so this adapter is always safe to use.
- */
+/** Writes every line to the logger it wraps and emits it to the global OpenTelemetry LoggerProvider, a no-op until `@jterrazz/telemetry/register` registers one. */
 export class OtelLoggerAdapter implements LoggerPort {
     private readonly innerLogger: LoggerPort;
     private readonly otelLogger: OtelLogger;
 
     constructor(innerLogger: LoggerPort) {
         this.innerLogger = innerLogger;
-        // Service name is injected via OTEL_SERVICE_NAME env var by infrastructure
         this.otelLogger = logs.getLogger(process.env.OTEL_SERVICE_NAME ?? 'unknown-service');
     }
 

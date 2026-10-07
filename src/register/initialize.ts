@@ -9,9 +9,7 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
 let initialized = false;
 
-/**
- * Parse OTLP headers from the standard "Key1=Value1,Key2=Value2" format
- */
+// outside: OTLP headers are written `Key1=Value1,Key2=Value2`, each value URL-encoded.
 function parseHeaders(headerString?: string): Record<string, string> {
     const headers: Record<string, string> = {};
 
@@ -30,18 +28,7 @@ function parseHeaders(headerString?: string): Record<string, string> {
     return headers;
 }
 
-/**
- * Initialize the OpenTelemetry SDK from the environment (12-factor):
- * - OTEL_EXPORTER_OTLP_ENDPOINT — collector endpoint; absent = telemetry off
- * - OTEL_SERVICE_NAME / OTEL_RESOURCE_ATTRIBUTES — identity, injected by infra
- * - OTEL_SDK_DISABLED=true — hard kill switch
- *
- * Registers auto-instrumentation (traces + metrics over OTLP) and a global
- * LoggerProvider used by OtelLoggerAdapter for OTLP log export.
- *
- * Idempotent. Runs automatically when loaded via:
- * `node --import @jterrazz/telemetry/register dist/index.js`
- */
+/** Starts the OpenTelemetry SDK from the OTEL_* environment, once: traces by auto-instrumentation, logs and metrics through the global providers; no OTEL_EXPORTER_OTLP_ENDPOINT, or OTEL_SDK_DISABLED=true, exports nothing. */
 export async function registerTelemetry(): Promise<void> {
     if (initialized) {
         return;
@@ -61,16 +48,12 @@ export async function registerTelemetry(): Promise<void> {
 
     const serviceName = process.env.OTEL_SERVICE_NAME ?? 'unknown-service';
 
-    // Exporter selection read by auto-instrumentations at import time.
-    // Logs go through the LoggerProvider below, metrics through the
-    // MeterProvider below (deterministic wiring — relying on the
-    // Auto-instrumentation SDK leaves getMeter() on the global no-op).
+    // hazard: auto-instrumentation reads these as it is imported; logs and metrics go through the providers registered here instead, since its own SDK would leave getMeter() on the global no-op.
     process.env.OTEL_TRACES_EXPORTER ??= 'otlp';
     process.env.OTEL_METRICS_EXPORTER ??= 'none';
     process.env.OTEL_LOGS_EXPORTER ??= 'none';
     process.env.OTEL_NODE_RESOURCE_DETECTORS ??= 'env,host,os';
 
-    // Parse deployment environment from OTEL_RESOURCE_ATTRIBUTES (injected by infra)
     const resourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ?? '';
     const environmentMatch = /deployment\.environment=(?<environment>[^,]+)/u.exec(
         resourceAttributes,
@@ -100,10 +83,7 @@ export async function registerTelemetry(): Promise<void> {
 
     logs.setGlobalLoggerProvider(loggerProvider);
 
-    // Initialize the MeterProvider for metrics export. Without this, every
-    // GetMeter() resolves to the global no-op and counters/histograms/gauges
-    // Silently emit nothing. The collector remote-writes these to Prometheus.
-    // ObservableGauge callbacks fire once per export interval.
+    // hazard: without a registered MeterProvider every getMeter() resolves to the global no-op, and every instrument emits nothing.
     const metricExporter = new OTLPMetricExporter({
         headers: parseHeaders(process.env.OTEL_EXPORTER_OTLP_HEADERS),
         url: `${endpoint}/v1/metrics`,
@@ -121,7 +101,6 @@ export async function registerTelemetry(): Promise<void> {
 
     metrics.setGlobalMeterProvider(meterProvider);
 
-    // Register auto-instrumentation for traces
     await import('@opentelemetry/auto-instrumentations-node/register');
 
     console.info('[Telemetry] Initialized', {

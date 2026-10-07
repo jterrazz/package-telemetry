@@ -1,8 +1,5 @@
 import { z } from 'zod';
 
-/**
- * Logger port - defines how to log messages with different severity levels
- */
 export const LoggerLevelSchema: z.ZodEnum<{
     debug: 'debug';
     error: 'error';
@@ -13,28 +10,10 @@ export const LoggerLevelSchema: z.ZodEnum<{
 export type LoggerLevel = z.infer<typeof LoggerLevelSchema>;
 
 export type LoggerPort = {
-    /**
-     * Create a child logger with specific bindings
-     */
+    /** A logger carrying these bindings on every line, beside its parent's. */
     child: (bindings: Record<string, unknown>) => LoggerPort;
-
-    /**
-     * Log a debug message
-     */
     debug: (message: string, meta?: Record<string, unknown>) => void;
-
-    /**
-     * Log an error message
-     */
     error: (message: string, meta?: Record<string, unknown>) => void;
-
-    /**
-     * Log an informational message
-     */
     info: (message: string, meta?: Record<string, unknown>) => void;
-
-    /**
-     * Log a warning message
-     */
     warn: (message: string, meta?: Record<string, unknown>) => void;
 };

@@ -8,10 +8,7 @@ export type CreateTracerOptions = {
     namespace?: string;
 };
 
-/**
- * Create an OpenTelemetry-backed tracer. A no-op until the SDK is
- * registered via '@jterrazz/telemetry/register'.
- */
+/** An OpenTelemetry tracer, a no-op until `@jterrazz/telemetry/register` registers the SDK. */
 export function createTracer(options: CreateTracerOptions = {}): TracerPort {
     return new OtelTracerAdapter(options);
 }

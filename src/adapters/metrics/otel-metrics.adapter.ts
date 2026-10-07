@@ -24,16 +24,7 @@ function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
     return result;
 }
 
-/**
- * OpenTelemetry metrics adapter. Metrics flow through OTLP to the collector,
- * which remote-writes them to Prometheus — no /metrics endpoint needed.
- *
- * Uses only '@opentelemetry/api': a no-op until the SDK is registered by
- * '@jterrazz/telemetry/register', so it is always safe to instantiate.
- *
- * The `namespace` option prefixes every metric name ('{namespace}.{name}'),
- * keeping the catalogue domain-free while emitted names stay unique per app.
- */
+/** Records through the global OpenTelemetry MeterProvider, a no-op until `@jterrazz/telemetry/register` registers one; `namespace` prefixes every name. */
 export class OtelMetricsAdapter<
     TMetrics extends TelemetryMetrics = TelemetryMetrics,
 > implements MetricsPort<TMetrics> {

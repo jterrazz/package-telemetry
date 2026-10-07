@@ -18,13 +18,7 @@ function sanitizeAttributes(attributes?: TelemetryAttributes): Attributes {
     return result;
 }
 
-/**
- * OpenTelemetry tracer adapter, for manual spans alongside auto-instrumentation.
- *
- * Uses only '@opentelemetry/api': a no-op until the SDK is registered by
- * '@jterrazz/telemetry/register', so it is always safe to instantiate —
- * including in tests and local runs without a collector.
- */
+/** Manual spans beside auto-instrumentation, through the global OpenTelemetry TracerProvider — a no-op until `@jterrazz/telemetry/register` registers one. */
 export class OtelTracerAdapter implements TracerPort {
     private readonly namespace: string | undefined;
     private readonly tracer: Tracer;
@@ -39,7 +33,6 @@ export class OtelTracerAdapter implements TracerPort {
     event(name: string, attributes?: TelemetryAttributes): void {
         const currentSpan = trace.getActiveSpan();
         if (!currentSpan) {
-            // No active span - event will be dropped. This is often intentional.
             return;
         }
         currentSpan.addEvent(name, sanitizeAttributes(attributes));
@@ -48,7 +41,6 @@ export class OtelTracerAdapter implements TracerPort {
     setAttribute(key: string, value: boolean | number | string): void {
         const currentSpan = trace.getActiveSpan();
         if (!currentSpan) {
-            // No active span - attribute will be dropped. This is often intentional.
             return;
         }
         currentSpan.setAttribute(key, value);

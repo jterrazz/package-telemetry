@@ -1,29 +1,19 @@
 import type { LoggerLevel, LoggerPort } from '../../ports/logger.port.js';
 
-/**
- * ANSI color codes for terminal output
- */
 const colors = {
     reset: '\u001B[0m',
     dim: '\u001B[2m',
-    // Levels: cyan, green, yellow, red
     debug: '\u001B[36m',
     info: '\u001B[32m',
     warn: '\u001B[33m',
     error: '\u001B[31m',
-    // Props: gray key, cyan string, yellow number, magenta boolean
     key: '\u001B[90m',
     string: '\u001B[36m',
     number: '\u001B[33m',
     boolean: '\u001B[35m',
 };
 
-/**
- * Pretty logger adapter for local development, with inline props display.
- *
- * Output format:
- * INFO  [12:34:56]: message.name  key=value key2="string value" num=123
- */
+/** Colored lines for local development: `INFO  [12:34:56]: server.started  port=3000`. */
 export class PrettyLoggerAdapter implements LoggerPort {
     private readonly bindings: Record<string, unknown>;
     private readonly minLevel: number;
@@ -108,11 +98,9 @@ export class PrettyLoggerAdapter implements LoggerPort {
         }
 
         if (typeof value === 'string') {
-            // Short strings without spaces: no quotes
             if (value.length <= 20 && !/\s/u.test(value)) {
                 return `${colors.string}${value}${colors.reset}`;
             }
-            // Longer or complex strings: use quotes
             return `${colors.string}"${value}"${colors.reset}`;
         }
 

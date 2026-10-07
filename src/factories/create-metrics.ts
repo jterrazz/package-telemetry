@@ -8,19 +8,7 @@ export type CreateMetricsOptions = {
     namespace?: string;
 };
 
-/**
- * Create an OpenTelemetry-backed metrics recorder. A no-op until the SDK
- * is registered via '@jterrazz/telemetry/register'.
- *
- * Type the catalogue to get a compile-time metrics plan:
- *
- * ```ts
- * type AppMetrics = TelemetryBaseMetrics & {
- *     'articles.processed': { source: string };
- * };
- * const metrics = createMetrics<AppMetrics>({ namespace: 'signews' });
- * ```
- */
+/** An OpenTelemetry metrics recorder typed by its catalogue, a no-op until `@jterrazz/telemetry/register` registers the SDK. */
 export function createMetrics<TMetrics extends TelemetryMetrics = TelemetryMetrics>(
     options: CreateMetricsOptions = {},
 ): MetricsPort<TMetrics> {

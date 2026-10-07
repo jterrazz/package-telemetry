@@ -6,23 +6,13 @@ import type { LoggerLevel, LoggerPort } from '../ports/logger.port.js';
 export type CreateLoggerOptions = {
     /** Minimum level to log (defaults to 'info') */
     level?: LoggerLevel;
-    /**
-     * Also emit logs through OTLP to the collector.
-     * Defaults to true when OTEL_EXPORTER_OTLP_ENDPOINT is set.
-     */
+    /** Also emit every line through OTLP — defaults to true when OTEL_EXPORTER_OTLP_ENDPOINT is set. */
     otlp?: boolean;
-    /**
-     * Human-readable colored output instead of JSON lines.
-     * Defaults to true outside production (NODE_ENV !== 'production').
-     */
+    /** Colored lines instead of JSON — defaults to true unless NODE_ENV is 'production'. */
     pretty?: boolean;
 };
 
-/**
- * Create a logger following the jterrazz conventions:
- * pretty colored lines in development, JSON lines on stdout in production,
- * dual-emitted to the OTLP collector whenever one is configured.
- */
+/** Colored lines in development, JSON lines on stdout in production, each also emitted through OTLP when a collector is configured. */
 export function createLogger(options: CreateLoggerOptions = {}): LoggerPort {
     const level = options.level ?? 'info';
     const pretty = options.pretty ?? process.env.NODE_ENV !== 'production';

@@ -1,13 +1,5 @@
 {
-    "src/adapters/logger/noop-logger.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 5
-        }
-    },
     "src/adapters/logger/otel-logger.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 4
-        },
         "max-classes-per-file": {
             "count": 1
         },
@@ -16,17 +8,11 @@
         }
     },
     "src/adapters/logger/pino-logger.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        },
         "typescript/no-misused-spread": {
             "count": 1
         }
     },
     "src/adapters/logger/pretty-logger.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 6
-        },
         "no-console": {
             "count": 2
         },
@@ -37,75 +23,14 @@
             "count": 2
         }
     },
-    "src/adapters/metrics/noop-metrics.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 5
-        }
-    },
     "src/adapters/metrics/otel-metrics.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        },
         "promise/prefer-await-to-callbacks": {
             "count": 2
-        }
-    },
-    "src/adapters/tracer/noop-tracer.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 3
-        }
-    },
-    "src/adapters/tracer/otel-tracer.adapter.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 3
-        }
-    },
-    "src/factories/create-logger.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 3
-        }
-    },
-    "src/factories/create-metrics.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        }
-    },
-    "src/factories/create-tracer.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        }
-    },
-    "src/index.register.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        }
-    },
-    "src/ports/logger.port.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 6
-        }
-    },
-    "src/ports/metrics.port.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 8
-        }
-    },
-    "src/ports/telemetry.port.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 1
-        }
-    },
-    "src/ports/tracer.port.ts": {
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 4
         }
     },
     "src/register/initialize.ts": {
         "complexity": {
             "count": 1
-        },
-        "jterrazz-typescript/comment-states-its-kind": {
-            "count": 6
         },
         "max-lines-per-function": {
             "count": 1

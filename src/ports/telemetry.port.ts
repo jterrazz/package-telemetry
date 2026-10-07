@@ -1,5 +1,2 @@
-/**
- * Attributes attached to spans, metrics and span events.
- * Values must be primitives — OpenTelemetry drops anything else.
- */
+/** outside: OpenTelemetry drops an attribute value that is not a primitive. */
 export type TelemetryAttributes = Record<string, boolean | number | string | undefined>;

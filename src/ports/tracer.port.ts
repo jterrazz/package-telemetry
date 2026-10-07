@@ -1,30 +1,14 @@
 import type { TelemetryAttributes } from './telemetry.port.js';
 
-/**
- * Tracer port - defines how to trace operations as spans, independently of
- * any tracing vendor.
- *
- * Span names follow OpenTelemetry conventions: lowercase dot.case, low
- * cardinality (e.g. 'pipeline.run', 'articles.fetch'). High-cardinality
- * detail (ids, urls) belongs in attributes, never in the name.
- */
+// outside: OpenTelemetry names a span in lowercase dot.case and keeps the name low-cardinality ('pipeline.run'); an id or a url is an attribute, never part of the name.
 export type TracerPort = {
-    /**
-     * Add an event to the currently active span. Dropped when no span is
-     * active — this is often intentional.
-     */
+    /** Adds an event to the active span; dropped when no span is active. */
     event: (name: string, attributes?: TelemetryAttributes) => void;
 
-    /**
-     * Set an attribute on the currently active span. Dropped when no span
-     * is active.
-     */
+    /** Sets an attribute on the active span; dropped when no span is active. */
     setAttribute: (key: string, value: boolean | number | string) => void;
 
-    /**
-     * Execute a function within a traced span. The span records timing,
-     * status and any thrown error, then rethrows.
-     */
+    /** Runs `fn` in a span that records its timing, its status and any error it throws, then rethrows. */
     span: <T>(name: string, fn: () => Promise<T>, options?: TracerSpanOptions) => Promise<T>;
 };
 
