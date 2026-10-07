@@ -13,17 +13,22 @@ const SEVERITIES: Record<Level, SeverityNumber> = {
     warn: SeverityNumber.WARN,
 };
 
-// outside: an OpenTelemetry attribute holds a primitive, so an Error is split into its message and its stack, any other object is serialized, and what JSON cannot hold is left out.
+const bigintAsText = (_key: string, value: unknown): unknown =>
+    typeof value === 'bigint' ? value.toString() : value;
+
+// outside: an OpenTelemetry attribute holds a primitive, so an Error is split into its message and its stack, any other object is serialized, and a bigint is written as its digits wherever it sits; JSON.stringify answers undefined for a function, a symbol or undefined, and the SDK drops an undefined attribute — as pino leaves them out of the line on stdout.
 function flattenMeta(meta: Record<string, unknown>): Record<string, boolean | number | string> {
     const result: Record<string, boolean | number | string> = {};
     for (const [key, value] of Object.entries(meta)) {
         if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
             result[key] = value;
+        } else if (typeof value === 'bigint') {
+            result[key] = value.toString();
         } else if (value instanceof Error) {
             result[`${key}.message`] = value.message;
             result[`${key}.stack`] = value.stack ?? '';
-        } else if (typeof value === 'object' && value !== null) {
-            result[key] = JSON.stringify(value);
+        } else if (value !== null) {
+            result[key] = JSON.stringify(value, bigintAsText);
         }
     }
     return result;

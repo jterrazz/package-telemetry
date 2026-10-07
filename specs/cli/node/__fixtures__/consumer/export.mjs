@@ -11,7 +11,15 @@ logger
     .child({ requestId: 'r-42' })
     .child({ route: '/cart' })
     .info('request.served', { cached: true, status: 200, user: { id: 7 } });
-logger.warn('stock.low', { error, sku: null, stock: 10n, unknown: undefined });
+logger.warn('stock.low', {
+    error,
+    notify() {},
+    reserved: { units: 4n },
+    sku: null,
+    stock: 10n,
+    tag: Symbol('vip'),
+    unknown: undefined,
+});
 const declined = Object.assign(new Error('declined'), { stack: undefined });
 logger.error('payment.failed', { attempt: 2, cause: declined });
 

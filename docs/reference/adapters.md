@@ -17,6 +17,13 @@ always return the OTel-backed adapter — the no-op behaviour comes from the
 API layer itself, not from a factory branch
 ([Architecture](../concepts/architecture.md)).
 
+`OtelLoggerAdapter` exports each line's bindings and meta as flat
+attributes, matching what pino writes on stdout: a primitive as it is, an
+`Error` as `<key>.message` and `<key>.stack`, any other object as its JSON,
+and a bigint as its digits wherever it sits. `undefined`, a function and a
+symbol are left out, as pino leaves them out of the line; a `null` is left
+out too, since an attribute holds none.
+
 ## Naming conventions
 
 Metric and span names are lowercase `dot.case`, low cardinality

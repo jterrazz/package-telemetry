@@ -66,7 +66,7 @@ describe('register', () => {
             }
             {"level":"debug","time":{{int}},"pid":{{int}},"hostname":"{{string}}","meta":{"entries":3},"msg":"cache.warmed"}
             {"level":"info","time":{{int}},"pid":{{int}},"hostname":"{{string}}","requestId":"r-42","route":"/cart","meta":{"cached":true,"status":200,"user":{"id":7}},"msg":"request.served"}
-            {"level":"warn","time":{{int}},"pid":{{int}},"hostname":"{{string}}","error":{"message":"boom","stack":"Error: boom\\n    at checkout (cart.mjs:1:1)"},"meta":{"sku":null,"stock":10},"msg":"stock.low"}
+            {"level":"warn","time":{{int}},"pid":{{int}},"hostname":"{{string}}","error":{"message":"boom","stack":"Error: boom\\n    at checkout (cart.mjs:1:1)"},"meta":{"reserved":{"units":4},"sku":null,"stock":10},"msg":"stock.low"}
             {"level":"error","time":{{int}},"pid":{{int}},"hostname":"{{string}}","meta":{"attempt":2,"cause":{}},"msg":"payment.failed"}
             flushed
         `);
