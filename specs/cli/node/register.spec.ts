@@ -56,7 +56,7 @@ describe('register', () => {
                 waitFor: 'flushed',
             });
 
-        // Then - every signal arrives namespaced, with its attributes and the service's identity, through the configured headers
+        // Then - every signal arrives namespaced, with its attributes and the service's identity on each signal's resource, through the configured headers
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             [Telemetry] Initialized {

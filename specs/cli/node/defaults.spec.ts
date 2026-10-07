@@ -6,7 +6,7 @@ import { startCollector } from './__setup__/collector.js';
 import { installPacked } from './__setup__/packed.js';
 
 describe('defaults', () => {
-    test('with no service or deployment named, the signals carry the defaults', async () => {
+    test('with no service or deployment named, each signal carries its own defaults', async () => {
         // Given - a collector, and an application with neither OTEL_SERVICE_NAME, OTEL_RESOURCE_ATTRIBUTES nor NODE_ENV set
         await using collector = await startCollector();
         const result = await cli
@@ -24,7 +24,7 @@ describe('defaults', () => {
                 waitFor: 'flushed',
             });
 
-        // Then - the service is unknown-service and the deployment development, on every signal
+        // Then - logs and metrics carry unknown-service in development, while traces carry OpenTelemetry's own unknown_service:node and no deployment
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             [Telemetry] Initialized {
@@ -59,9 +59,24 @@ describe('defaults', () => {
                         "scope": "unknown-service"
                     }
                 ],
-                "resource": {
-                    "deployment.environment": "development",
-                    "service.name": "unknown-service"
+                "resources": {
+                    "logs": {
+                        "deployment.environment": "development",
+                        "host.*": false,
+                        "process.*": false,
+                        "service.name": "unknown-service"
+                    },
+                    "metrics": {
+                        "deployment.environment": "development",
+                        "host.*": false,
+                        "process.*": false,
+                        "service.name": "unknown-service"
+                    },
+                    "traces": {
+                        "host.*": true,
+                        "process.*": false,
+                        "service.name": "unknown_service:node"
+                    }
                 },
                 "spans": [
                     {
@@ -73,11 +88,7 @@ describe('defaults', () => {
                             "code": 1
                         }
                     }
-                ],
-                "traceResource": {
-                    "host": true,
-                    "process": false
-                }
+                ]
             }`);
     });
 });

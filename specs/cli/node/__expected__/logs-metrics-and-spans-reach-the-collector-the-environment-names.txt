@@ -118,9 +118,25 @@
             "scope": "consumer"
         }
     ],
-    "resource": {
-        "deployment.environment": "staging",
-        "service.name": "consumer"
+    "resources": {
+        "logs": {
+            "deployment.environment": "staging",
+            "host.*": false,
+            "process.*": false,
+            "service.name": "consumer"
+        },
+        "metrics": {
+            "deployment.environment": "staging",
+            "host.*": false,
+            "process.*": false,
+            "service.name": "consumer"
+        },
+        "traces": {
+            "deployment.environment": "staging",
+            "host.*": true,
+            "process.*": false,
+            "service.name": "consumer"
+        }
     },
     "spans": [
         {
@@ -168,9 +184,5 @@
                 "code": 1
             }
         }
-    ],
-    "traceResource": {
-        "host": true,
-        "process": false
-    }
+    ]
 }

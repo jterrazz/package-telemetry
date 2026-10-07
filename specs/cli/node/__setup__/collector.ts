@@ -8,9 +8,8 @@ type Collected = {
     headers: Record<string, string | string[] | undefined>;
     logs: unknown[];
     metrics: unknown[];
-    resource: Record<string, unknown>;
+    resources: Record<Signal, Record<string, unknown>>;
     spans: unknown[];
-    traceResource: { host: boolean; process: boolean };
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -46,11 +45,14 @@ const scopedOf = (payload: unknown, resource: string, scope: string, items: stri
         ),
     );
 
-function resourceOf(payload: unknown): Record<string, unknown> {
-    const [first] = listOf(fieldOf(payload, 'resourceLogs'));
+function resourceOf(payload: unknown, resources: string): Record<string, unknown> {
+    const [first] = listOf(fieldOf(payload, resources));
     const attributes = attributesOf(fieldOf(fieldOf(first, 'resource'), 'attributes'));
+    const keys = Object.keys(attributes);
     return {
         'deployment.environment': attributes['deployment.environment'],
+        'host.*': keys.some((key) => key.startsWith('host.')),
+        'process.*': keys.some((key) => key.startsWith('process.')),
         'service.name': attributes['service.name'],
     };
 }
@@ -84,31 +86,22 @@ const spanOf = ({ item: span, scope }: Scoped): unknown => ({
     status: fieldOf(span, 'status'),
 });
 
-function traceResourceOf(payload: unknown): Collected['traceResource'] {
-    const [first] = listOf(fieldOf(payload, 'resourceSpans'));
-    const resource = fieldOf(first, 'resource');
-    const keys = Object.keys(attributesOf(fieldOf(resource, 'attributes')));
-    return {
-        host: keys.some((key) => key.startsWith('host.')),
-        process: keys.some((key) => key.startsWith('process.')),
-    };
-}
-
 function readersOf(collected: Collected): Record<Signal, (payload: unknown) => void> {
     return {
         logs: (payload) => {
-            collected.resource = resourceOf(payload);
+            collected.resources.logs = resourceOf(payload, 'resourceLogs');
             collected.logs.push(
                 ...scopedOf(payload, 'resourceLogs', 'scopeLogs', 'logRecords').map(logOf),
             );
         },
         metrics: (payload) => {
+            collected.resources.metrics = resourceOf(payload, 'resourceMetrics');
             collected.metrics.push(
                 ...scopedOf(payload, 'resourceMetrics', 'scopeMetrics', 'metrics').map(metricOf),
             );
         },
         traces: (payload) => {
-            collected.traceResource = traceResourceOf(payload);
+            collected.resources.traces = resourceOf(payload, 'resourceSpans');
             collected.spans.push(
                 ...scopedOf(payload, 'resourceSpans', 'scopeSpans', 'spans').map(spanOf),
             );
@@ -124,9 +117,8 @@ export async function startCollector(): Promise<
         headers: {},
         logs: [],
         metrics: [],
-        resource: {},
+        resources: { logs: {}, metrics: {}, traces: {} },
         spans: [],
-        traceResource: { host: false, process: false },
     };
     const readers = readersOf(collected);
     const server = createServer((request, response) => {
