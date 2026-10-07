@@ -1,0 +1,176 @@
+{
+    "headers": {
+        "authorization": "Bearer s3cret",
+        "tenant": "shop"
+    },
+    "logs": [
+        {
+            "attributes": {
+                "entries": 3
+            },
+            "body": "cache.warmed",
+            "scope": "consumer",
+            "severity": "DEBUG (5)"
+        },
+        {
+            "attributes": {
+                "requestId": "r-42",
+                "route": "/cart",
+                "cached": true,
+                "status": 200,
+                "user": "{\"id\":7}"
+            },
+            "body": "request.served",
+            "scope": "consumer",
+            "severity": "INFO (9)"
+        },
+        {
+            "attributes": {
+                "error.message": "boom",
+                "error.stack": "Error: boom\n    at checkout (cart.mjs:1:1)"
+            },
+            "body": "stock.low",
+            "scope": "consumer",
+            "severity": "WARN (13)"
+        },
+        {
+            "attributes": {
+                "attempt": 2,
+                "cause.message": "declined",
+                "cause.stack": ""
+            },
+            "body": "payment.failed",
+            "scope": "consumer",
+            "severity": "ERROR (17)"
+        }
+    ],
+    "metrics": [
+        {
+            "name": "orders.refunded",
+            "points": [
+                {
+                    "attributes": {},
+                    "value": 1
+                }
+            ],
+            "scope": "orders-meter"
+        },
+        {
+            "name": "shop.orders.placed",
+            "points": [
+                {
+                    "attributes": {
+                        "channel": "web"
+                    },
+                    "value": 3
+                },
+                {
+                    "attributes": {
+                        "channel": "app"
+                    },
+                    "value": 1
+                }
+            ],
+            "scope": "consumer"
+        },
+        {
+            "name": "shop.checkout.duration",
+            "points": [
+                {
+                    "attributes": {
+                        "channel": "web"
+                    },
+                    "value": 125
+                }
+            ],
+            "scope": "consumer"
+        },
+        {
+            "name": "shop.checkout.items",
+            "points": [
+                {
+                    "attributes": {},
+                    "value": 3
+                }
+            ],
+            "scope": "consumer"
+        },
+        {
+            "name": "shop.queue.depth",
+            "points": [
+                {
+                    "attributes": {},
+                    "value": 7
+                }
+            ],
+            "scope": "consumer"
+        },
+        {
+            "name": "shop.cart.size",
+            "points": [
+                {
+                    "attributes": {
+                        "stat": "mean"
+                    },
+                    "value": 3
+                }
+            ],
+            "scope": "consumer"
+        }
+    ],
+    "resource": {
+        "deployment.environment": "staging",
+        "service.name": "consumer"
+    },
+    "spans": [
+        {
+            "attributes": {
+                "channel": "web",
+                "cart.paid": true
+            },
+            "events": [
+                "cart.priced"
+            ],
+            "name": "shop.checkout.run",
+            "scope": "consumer",
+            "status": {
+                "code": 1
+            }
+        },
+        {
+            "attributes": {},
+            "events": [
+                "exception"
+            ],
+            "name": "shop.payment.charge",
+            "scope": "consumer",
+            "status": {
+                "code": 2,
+                "message": "card declined"
+            }
+        },
+        {
+            "attributes": {},
+            "events": [],
+            "name": "shop.coupon.apply",
+            "scope": "consumer",
+            "status": {
+                "code": 2,
+                "message": "coupon expired"
+            }
+        },
+        {
+            "attributes": {},
+            "events": [],
+            "name": "nightly.run",
+            "scope": "jobs-tracer",
+            "status": {
+                "code": 1
+            }
+        }
+    ],
+    "traceResource": {
+        "host": true,
+        "process": false
+    }
+}
