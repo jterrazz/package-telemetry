@@ -4,7 +4,7 @@ type Attribute = { key: string; value: Record<string, unknown> };
 
 type Signal = 'logs' | 'metrics' | 'traces';
 
-export type Collected = {
+type Collected = {
     headers: Record<string, string | string[] | undefined>;
     logs: unknown[];
     metrics: unknown[];
