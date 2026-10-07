@@ -19,7 +19,11 @@ measure. Replaces `@jterrazz/logger` and `@jterrazz/monitor` (both deprecated).
 
 3. Nothing else. Config comes from `OTEL_*` env vars, injected by the K8s app
    chart (`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`,
-   `OTEL_RESOURCE_ATTRIBUTES`). No endpoint = silent no-op (stdout logs only).
+   `OTEL_RESOURCE_ATTRIBUTES`). No endpoint = one `[Telemetry]` status line on
+   stdout, nothing exported (stdout logs only). A job or CLI flushes before it
+   exits: `forceFlush()` on the global meter, tracer and logger providers.
+   `createLogger`'s `level` filters stdout only: with an endpoint (or
+   `otlp: true`) every level is exported.
 
 ## Factories (the common path)
 

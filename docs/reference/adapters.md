@@ -17,6 +17,14 @@ always return the OTel-backed adapter — the no-op behaviour comes from the
 API layer itself, not from a factory branch
 ([Architecture](../concepts/architecture.md)).
 
+The two sides of a dual-emitting logger do not filter alike. `level` is
+handed to the pino or pretty adapter, so it decides what reaches stdout and
+stderr only: `OtelLoggerAdapter` emits every line to the `LoggerProvider`,
+so with the default `info` — or with `silent` — a `debug` line still reaches
+Loki. Dual-emit follows the endpoint, not `NODE_ENV`: `otlp` defaults to
+whether `OTEL_EXPORTER_OTLP_ENDPOINT` is set, and `otlp: false` or
+`otlp: true` overrides it either way.
+
 `OtelLoggerAdapter` exports each line's bindings and meta as flat
 attributes, matching what pino writes on stdout: a primitive as it is, an
 `Error` as `<key>.message` and `<key>.stack`, any other object as its JSON,
@@ -72,6 +80,31 @@ auto-instrumentation's SDK, which follows OpenTelemetry's defaults: with no
 `OTEL_RESOURCE_ATTRIBUTES` they carry no deployment — `NODE_ENV` is not read
 for them (`specs/cli/node/defaults.spec.ts`). The app chart sets both
 variables, so a deployed service's signals agree.
+
+## Short-lived processes
+
+`registerTelemetry()` sets no exit hook. Logs leave in batches of up to one
+second, metrics on a fifteen-second period, so a process that ends on its
+own — a job, a CLI — loses what it recorded last unless it flushes the global
+providers before it exits, as the specs' consumers do (the API's provider
+types declare no `forceFlush`; the SDK providers registered behind them
+have it, so TypeScript narrows or casts to them):
+
+```js
+import { metrics, trace } from '@opentelemetry/api';
+import { logs } from '@opentelemetry/api-logs';
+
+await metrics.getMeterProvider().forceFlush();
+await trace.getTracerProvider().getDelegate().forceFlush();
+await logs.getLoggerProvider().forceFlush();
+```
+
+With no endpoint configured, `registerTelemetry()` prints one status line on
+stdout (`[Telemetry] No OTEL_EXPORTER_OTLP_ENDPOINT configured, export
+disabled`) and exports nothing; under `OTEL_SDK_DISABLED=true` the line is
+`[Telemetry] Disabled by OTEL_SDK_DISABLED`.
+
+## Where signals land
 
 Signals land in Grafana: logs and traces flow to Loki and Tempo through the
 cluster's otel-collector; metrics are remote-written to Prometheus — there

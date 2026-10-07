@@ -33,8 +33,10 @@ node --import @jterrazz/telemetry/register dist/index.js
 
 That's the entire setup. Everything is configured from `OTEL_*` environment
 variables — on the jterrazz K8s app chart they are injected automatically.
-Without an endpoint configured, telemetry is a silent no-op: logs still reach
-stdout, spans and metrics cost nothing.
+Without an endpoint configured, the register entry prints one status line
+and exports nothing: logs still reach stdout, spans and metrics cost nothing.
+A short-lived process (a job, a CLI) flushes the providers itself before it
+exits — [Adapters § Short-lived processes](docs/reference/adapters.md#short-lived-processes).
 
 ## The three pillars
 
@@ -44,8 +46,10 @@ stdout, spans and metrics cost nothing.
 | Traces  | `TracerPort`  | `createTracer()`  |
 | Metrics | `MetricsPort` | `createMetrics()` |
 
-In production the logger dual-emits: JSON lines on stdout (`kubectl logs`
-keeps working) and OTLP to the collector (→ Loki → Grafana). Traces nest
+When an OTLP endpoint is configured (or `otlp: true` is passed) the logger
+dual-emits: its lines on stdout — JSON in production, so `kubectl logs` keeps
+working — and every line, whatever its level, over OTLP to the collector
+(→ Loki → Grafana); `level` filters only the stdout side. Traces nest
 automatically alongside HTTP/DB auto-instrumentation. Metrics flow through
 OTLP to the collector, which remote-writes them to Prometheus — no
 `/metrics` endpoint, no prom-client.

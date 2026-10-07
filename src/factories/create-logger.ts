@@ -4,9 +4,9 @@ import { PrettyLoggerAdapter } from '../adapters/logger/pretty-logger.adapter.js
 import type { LoggerLevel, LoggerPort } from '../ports/logger.port.js';
 
 export type CreateLoggerOptions = {
-    /** Minimum level to log (defaults to 'info') */
+    /** Minimum level written to stdout (defaults to 'info'); the OTLP side exports every level. */
     level?: LoggerLevel;
-    /** Also emit every line through OTLP — defaults to true when OTEL_EXPORTER_OTLP_ENDPOINT is set. */
+    /** Also emit every line, whatever its level, through OTLP — defaults to true when OTEL_EXPORTER_OTLP_ENDPOINT is set. */
     otlp?: boolean;
     /** Colored lines instead of JSON — defaults to true unless NODE_ENV is 'production'. */
     pretty?: boolean;
