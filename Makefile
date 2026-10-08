@@ -9,14 +9,14 @@ install: node_modules/.install
 build: node_modules/.install
 	npm run build
 
-# The Publish (packaging) pass of the check reads dist/.
+# invariant: the Publish (packaging) pass of the check reads dist/.
 lint: build
 	npm run lint
 
 fix: node_modules/.install
 	npx typescript fix
 
-# The specs install the tarball npm pack writes from dist/.
+# invariant: the specs install the tarball npm pack writes from dist/.
 test: build
 	npm test
 
