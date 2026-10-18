@@ -11,4 +11,4 @@
 
 ## Related
 
-- [Adapters](../reference/adapters.md) — every logger adapter, and what `createLogger()` chooses.
+- [Adapters](../reference/adapters.md): every logger adapter, and what `createLogger()` chooses.

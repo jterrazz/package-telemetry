@@ -1,4 +1,4 @@
-# @jterrazz/telemetry — the manual
+# The @jterrazz/telemetry manual
 
 Logs, traces and metrics for a Node.js service, over OpenTelemetry and behind ports. What the package is and how a service starts using it is the repository's README; this page lists every page of the manual, by what the reader came to do.
 
@@ -13,9 +13,9 @@ Logs, traces and metrics for a Node.js service, over OpenTelemetry and behind po
 
 ## Concepts
 
-| Page                                     | Answers                                                                                        |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [Architecture](concepts/architecture.md) | The layers — ports, adapters, factories, the register entry — the exports, the typed catalogue |
+| Page                                     | Answers                                                                                       |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [Architecture](concepts/architecture.md) | The layers (ports, adapters, factories, the register entry), the exports, the typed catalogue |
 
 ## Reference
 

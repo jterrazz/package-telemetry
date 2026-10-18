@@ -13,14 +13,14 @@ path; every adapter is also exported for custom wiring.
 `options.pretty` (default: `NODE_ENV !== 'production'`), then wraps it in
 `OtelLoggerAdapter` when `options.otlp` or an OTLP endpoint is configured
 (`src/factories/create-logger.ts`). `createTracer()` and `createMetrics()`
-always return the OTel-backed adapter — the no-op behaviour comes from the
+always return the OTel-backed adapter: the no-op behaviour comes from the
 API layer itself, not from a factory branch
 ([Architecture](../concepts/architecture.md)).
 
 The two sides of a dual-emitting logger do not filter alike. `level` is
 handed to the pino or pretty adapter, so it decides what reaches stdout and
 stderr only: `OtelLoggerAdapter` emits every line to the `LoggerProvider`,
-so with the default `info` — or with `silent` — a `debug` line still reaches
+so with the default `info`, or with `silent`, a `debug` line still reaches
 Loki. Dual-emit follows the endpoint, not `NODE_ENV`: `otlp` defaults to
 whether `OTEL_EXPORTER_OTLP_ENDPOINT` is set, and `otlp: false` or
 `otlp: true` overrides it either way.
@@ -35,7 +35,7 @@ out too, since an attribute holds none.
 ## Naming conventions
 
 Metric and span names are lowercase `dot.case`, low cardinality
-(`pipeline.run`, `articles.processed`). High-cardinality detail — ids, urls —
+(`pipeline.run`, `articles.processed`). High-cardinality detail (ids, urls)
 goes in attributes, never in names. The application domain is never part of
 a name: it is injected once through the `namespace` option and prefixed at
 emission (`{namespace}.{name}`, e.g. `signews.task.started`). Service
@@ -49,7 +49,7 @@ infrastructure rather than passed by the application.
 
 | Variable                      | Effect                                                                                   |
 | ----------------------------- | ---------------------------------------------------------------------------------------- |
-| `OTEL_SDK_DISABLED=true`      | Hard kill switch — skips registration entirely                                           |
+| `OTEL_SDK_DISABLED=true`      | Hard kill switch: skips registration entirely                                            |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint; absent or empty = every export disabled                              |
 | `OTEL_SERVICE_NAME`           | `service.name` on the logs and metrics resource (default `unknown-service`)              |
 | `OTEL_RESOURCE_ATTRIBUTES`    | `deployment.environment` is parsed out of it for the logs and metrics resource           |
@@ -58,7 +58,7 @@ infrastructure rather than passed by the application.
 OpenTelemetry's exporters and SDK read the rest themselves, among them
 `OTEL_EXPORTER_OTLP_HEADERS` (`Key=Value,Key2=Value2`, each value
 URL-encoded), the per-signal `OTEL_EXPORTER_OTLP_{LOGS,METRICS,TRACES}_ENDPOINT`,
-`_HEADERS` and `_TIMEOUT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, and — for traces —
+`_HEADERS` and `_TIMEOUT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, and, for traces,
 `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` again.
 
 Before it imports auto-instrumentation, `registerTelemetry()` sets four
@@ -77,7 +77,7 @@ logs and metrics resource. Traces take their resource from
 auto-instrumentation's SDK, which follows OpenTelemetry's defaults: with no
 `OTEL_SERVICE_NAME` their `service.name` is `unknown_service:<argv0>`
 (`unknown_service:node`), and with no `deployment.environment` in
-`OTEL_RESOURCE_ATTRIBUTES` they carry no deployment — `NODE_ENV` is not read
+`OTEL_RESOURCE_ATTRIBUTES` they carry no deployment: `NODE_ENV` is not read
 for them (`specs/cli/node/defaults.spec.ts`). The app chart sets both
 variables, so a deployed service's signals agree.
 
@@ -85,7 +85,7 @@ variables, so a deployed service's signals agree.
 
 `registerTelemetry()` sets no exit hook. Logs leave in batches of up to one
 second, metrics on a fifteen-second period, so a process that ends on its
-own — a job, a CLI — loses what it recorded last unless it flushes the global
+own (a job, a CLI) loses what it recorded last unless it flushes the global
 providers before it exits, as the specs' consumers do (the API's provider
 types declare no `forceFlush`; the SDK providers registered behind them
 have it, so TypeScript narrows or casts to them):
@@ -107,11 +107,11 @@ disabled`) and exports nothing; under `OTEL_SDK_DISABLED=true` the line is
 ## Where signals land
 
 Signals land in Grafana: logs and traces flow to Loki and Tempo through the
-cluster's otel-collector; metrics are remote-written to Prometheus — there
+cluster's otel-collector; metrics are remote-written to Prometheus; there
 is no `/metrics` endpoint to scrape.
 
 ## Related
 
-- [Architecture](../concepts/architecture.md) — the ports these adapters implement, and why the OTel ones need no "is telemetry on" branch.
-- [Develop](../guides/develop.md) — where a new adapter goes.
-- [Migrate from @jterrazz/logger](../guides/migrate-from-logger.md) — the logger names this package kept.
+- [Architecture](../concepts/architecture.md): the ports these adapters implement, and why the OTel ones need no "is telemetry on" branch.
+- [Develop](../guides/develop.md): where a new adapter goes.
+- [Migrate from @jterrazz/logger](../guides/migrate-from-logger.md): the logger names this package kept.

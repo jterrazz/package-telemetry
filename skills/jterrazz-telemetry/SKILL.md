@@ -1,6 +1,6 @@
 ---
 name: jterrazz-telemetry
-description: Use when adding or configuring observability — logging, tracing, or metrics. Covers structured logs (pino + OTLP dual-emit), spans, typed metric catalogues, and the OpenTelemetry SDK setup via @jterrazz/telemetry.
+description: Use when adding or configuring observability: logging, tracing, or metrics. Covers structured logs (pino + OTLP dual-emit), spans, typed metric catalogues, and the OpenTelemetry SDK setup via @jterrazz/telemetry.
 ---
 
 # @jterrazz/telemetry
@@ -41,7 +41,7 @@ code, never the adapters.
 ## Ports
 
 ```typescript
-// LoggerLevelSchema (zod): 'debug' | 'info' | 'warn' | 'error' | 'silent' — parse a configured level with it
+// LoggerLevelSchema (zod): 'debug' | 'info' | 'warn' | 'error' | 'silent'; parse a configured level with it
 interface LoggerPort {
     child: (bindings: Record<string, unknown>) => LoggerPort;
     debug/info/warn/error: (message: string, meta?: Record<string, unknown>) => void;
@@ -77,15 +77,15 @@ metrics.counter('articles.processed', { attributes: { source: 'worldnews' } });
 ```
 
 Base catalogue (uniform dashboards across services): `task.started`,
-`task.completed`, `task.failed`, `task.duration` — all take `{ task }`.
+`task.completed`, `task.failed`, `task.duration`, all taking `{ task }`.
 
 ## Conventions
 
 - Names: lowercase `dot.case`, low cardinality (`pipeline.run`). Ids/urls go
   in attributes, never in names.
-- Domain is NOT in the name — set it once via `namespace`; emission becomes
+- Domain is NOT in the name: set it once via `namespace`; emission becomes
   `{namespace}.{name}` (e.g. `signews.task.started`).
-- Signals land in Grafana: logs → Loki, traces → Tempo, metrics → Prometheus
+- Signals land in Grafana: logs in Loki, traces in Tempo, metrics in Prometheus
   (via the cluster otel-collector; no /metrics endpoint needed).
 
 ## Testing
@@ -97,5 +97,5 @@ is registered, so unit tests need no mocking.
 ## Migrating from @jterrazz/logger
 
 `LoggerPort`, `LoggerLevel`, `PinoLoggerAdapter`, `NoopLoggerAdapter`: change
-the import to `@jterrazz/telemetry`. `prettyPrint` option is gone — use
+the import to `@jterrazz/telemetry`. `prettyPrint` option is gone; use
 `createLogger()` (auto) or `PrettyLoggerAdapter` (explicit).
