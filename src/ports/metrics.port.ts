@@ -1,8 +1,8 @@
 import type { TelemetryAttributes } from './telemetry.port.js';
 
-// outside: OpenTelemetry names a metric in lowercase dot.case ('task.started'); the application's domain is no part of the name — the adapter's `namespace` prefixes every one ('{namespace}.{name}').
+// outside: OpenTelemetry names a metric in lowercase dot.case ('task.started'); the application's domain is no part of the name: the adapter's `namespace` prefixes every one ('{namespace}.{name}').
 
-/** hazard: a catalogue declared as an interface has no implicit index signature and fails this constraint — declare it as a type alias, `TelemetryBaseMetrics & { … }`. */
+/** hazard: a catalogue declared as an interface has no implicit index signature and fails this constraint, so declare it as a type alias, `TelemetryBaseMetrics & { ... }`. */
 export type TelemetryMetrics = Record<string, TelemetryAttributes>;
 
 /** The task lifecycle every service emits, so one dashboard reads them all: `task.duration` is a histogram in milliseconds, the others are counters. */

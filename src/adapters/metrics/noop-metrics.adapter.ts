@@ -6,7 +6,7 @@ import type {
     TelemetryMetrics,
 } from '../../ports/metrics.port.js';
 
-/** A MetricsPort that records nothing — for tests. */
+/** A MetricsPort that records nothing, for tests. */
 export class NoopMetricsAdapter<
     TMetrics extends TelemetryMetrics = TelemetryMetrics,
 > implements MetricsPort<TMetrics> {

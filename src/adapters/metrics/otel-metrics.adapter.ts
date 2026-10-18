@@ -9,7 +9,7 @@ import type {
     TelemetryMetrics,
 } from '../../ports/metrics.port.js';
 
-// outside: a meter shares one storage per name, but every create call validates the name, resolves the views and builds a new instrument (sdk-metrics 2.x) — so each instrument is made once per name and kept; it drops an attribute whose value is undefined.
+// outside: a meter shares one storage per name, but every create call validates the name, resolves the views and builds a new instrument (sdk-metrics 2.x), so each instrument is made once per name and kept; it drops an attribute whose value is undefined.
 /** Records through the global OpenTelemetry MeterProvider, a no-op until `@jterrazz/telemetry/register` registers one; `namespace` prefixes every name. */
 export class OtelMetricsAdapter<
     TMetrics extends TelemetryMetrics = TelemetryMetrics,

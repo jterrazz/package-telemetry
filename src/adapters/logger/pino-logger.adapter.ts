@@ -2,7 +2,7 @@ import pino from 'pino';
 
 import type { LoggerLevel, LoggerPort } from '../../ports/logger.port.js';
 
-/** One JSON line per log on stdout, through pino — the production adapter, read by `kubectl logs` and Loki. */
+/** One JSON line per log on stdout, through pino: the production adapter, read by `kubectl logs` and Loki. */
 export class PinoLoggerAdapter implements LoggerPort {
     private logger: pino.Logger;
     private readonly config: {

@@ -8,7 +8,7 @@ const inheritedTelemetry = Object.fromEntries(
         .map((name) => [name, null]),
 );
 
-// hazard: NODE_OPTIONS stays inherited — the mutation run hands every spawned node its coverage reporter through it.
+// hazard: NODE_OPTIONS stays inherited: the mutation run hands every spawned node its coverage reporter through it.
 export const { cleanup, cli } = await specification.cli('node', {
     defaults: {
         ...inheritedTelemetry,

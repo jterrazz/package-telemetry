@@ -4,7 +4,7 @@ import type { Tracer } from '@opentelemetry/api';
 import type { TelemetryAttributes } from '../../ports/telemetry.port.js';
 import type { TracerPort, TracerSpanOptions } from '../../ports/tracer.port.js';
 
-/** Manual spans beside auto-instrumentation, through the global OpenTelemetry TracerProvider — a no-op until `@jterrazz/telemetry/register` registers one. */
+/** Manual spans beside auto-instrumentation, through the global OpenTelemetry TracerProvider, a no-op until `@jterrazz/telemetry/register` registers one. */
 export class OtelTracerAdapter implements TracerPort {
     private readonly namespace: string | undefined;
     private readonly tracer: Tracer;
