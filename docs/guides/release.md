@@ -23,10 +23,11 @@ The sequence, in order:
 
 1. the change merges to `main` and validates green;
 2. `version` in `package.json` (and the lockfile) is bumped on `main`;
-3. the owner tags `vX.Y.Z` and creates the GitHub Release;
-4. the workflow publishes to npm, with provenance.
+3. `make rehearse` runs the gate on that commit as the runner will, on Linux ([A rehearsal on Linux](https://github.com/jterrazz/package-typescript/blob/main/docs/reference/commands.md#a-rehearsal-on-linux)), and exits 0;
+4. the owner tags `vX.Y.Z` and creates the GitHub Release;
+5. the workflow publishes to npm, with provenance.
 
-Steps 2 to 4 are the owner's. A contributor never bumps the version inside a
+Steps 2 to 5 are the owner's. A contributor never bumps the version inside a
 feature branch: two branches in flight would both claim the same number, and
 the tag is what the registry answers to.
 
