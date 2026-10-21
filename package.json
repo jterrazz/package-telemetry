@@ -2,6 +2,7 @@
     "name": "@jterrazz/telemetry",
     "version": "1.1.2",
     "description": "Unified observability for Node.js: logs, traces and metrics over OpenTelemetry, with ports & adapters.",
+    "license": "MIT",
     "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
     "repository": {
         "type": "git",
@@ -47,5 +48,8 @@
         "@jterrazz/typescript": "^11.0.0",
         "@types/node": "^25.5.0",
         "vitest": "^5.0.1"
+    },
+    "engines": {
+        "node": ">=24"
     }
 }
