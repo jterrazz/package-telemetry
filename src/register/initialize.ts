@@ -30,7 +30,8 @@ function registerLogs(resource: Resource): void {
         new LoggerProvider({
             processors: [
                 // Stryker disable next-line ObjectLiteral: the batch's size and delay decide when a record leaves, never what leaves
-                new BatchLogRecordProcessor(exporter, {
+                new BatchLogRecordProcessor({
+                    exporter,
                     maxExportBatchSize: 100,
                     scheduledDelayMillis: 1000,
                 }),
