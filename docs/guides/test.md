@@ -3,7 +3,7 @@
 What proves a change here is a specification of what a consumer meets: the package installed from the tarball `npm pack` writes, driven from a consumer's project by `node`. There is no module test today.
 
 ```bash
-make test       # builds, then runs every spec
+make test       # builds, then typescript test: the specs the change reaches, none on a proven tree
 make mutation   # the zero-survivor verdict over the change
 ```
 
