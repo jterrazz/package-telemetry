@@ -1,5 +1,5 @@
 ---
-name: jterrazz-telemetry
+name: studio-telemetry
 description: 'Use when adding or configuring observability: logging, tracing, or metrics. Covers structured logs (pino + OTLP dual-emit), spans, typed metric catalogues, and the OpenTelemetry SDK setup via @jterrazz/telemetry.'
 ---
 

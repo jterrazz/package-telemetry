@@ -64,7 +64,7 @@ The manual lives in [`docs/`](docs/README.md):
 - [Develop](docs/guides/develop.md), [Test](docs/guides/test.md), [Release](docs/guides/release.md): changing, proving and publishing the package.
 
 For agents: read the pages straight from the repo, plus the
-[`skills/jterrazz-telemetry`](skills/jterrazz-telemetry/SKILL.md) Claude Code skill.
+[`skills/studio-telemetry`](skills/studio-telemetry/SKILL.md) Claude Code skill.
 
 ## License
 

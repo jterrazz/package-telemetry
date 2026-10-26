@@ -8,7 +8,7 @@ this guide is how it is cut and who cuts it.
 ## What a merge to `main` does
 
 Nothing that reaches a consumer. `.github/workflows/validate.yaml` runs on
-every push and pull request to `main` and calls the shared `jterrazz-actions`
+every push and pull request to `main` and calls the shared `studio-actions`
 validation workflow: build, lint, test, mutation. A green `main` is a publishable
 tree, not a published one.
 
