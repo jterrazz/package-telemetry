@@ -7,15 +7,15 @@ this guide is how it is cut and who cuts it.
 
 ## What a merge to `main` does
 
-Nothing that reaches a consumer. `.github/workflows/validate.yaml` runs on
+Nothing that reaches a consumer. `.github/workflows/check.yaml` runs on
 every push and pull request to `main` and calls the shared `studio-actions`
-validation workflow: build, lint, test, mutation. A green `main` is a publishable
+check workflow: build, lint, test, mutation. A green `main` is a publishable
 tree, not a published one.
 
 ## What publishes
 
 `.github/workflows/release.yaml` fires on `release: created` and calls the
-shared `release-npm.yaml` workflow with npm provenance (`id-token: write`).
+shared `publish-npm.yaml` workflow with npm provenance (`id-token: write`).
 Exactly one gesture publishes, and a human makes it: cutting a GitHub
 Release.
 
@@ -33,5 +33,5 @@ the tag is what the registry answers to.
 
 ## Related
 
-- [Test](test.md): what `validate.yaml` runs.
+- [Test](test.md): what `check.yaml` runs.
 - [Develop](develop.md): the gates a merge must pass.
