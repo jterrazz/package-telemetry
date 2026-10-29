@@ -32,7 +32,7 @@ node --import @jterrazz/telemetry/register dist/index.js
 ```
 
 That's the entire setup. Everything is configured from `OTEL_*` environment
-variables; on the jterrazz K8s app chart they are injected automatically.
+variables; on the studio-infrastructure app chart they are injected automatically.
 Without an endpoint configured, the register entry prints one status line
 and exports nothing: logs still reach stdout, spans and metrics cost nothing.
 A short-lived process (a job, a CLI) flushes the providers itself before it
