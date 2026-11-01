@@ -14,7 +14,7 @@ tree, not a published one.
 
 ## What publishes
 
-`.github/workflows/release.yaml` fires on `release: created` and calls the
+`.github/workflows/publish.yaml` fires on `release: created` and calls the
 shared `publish-npm.yaml` workflow with npm provenance (`id-token: write`).
 Exactly one gesture publishes, and a human makes it: cutting a GitHub
 Release.
